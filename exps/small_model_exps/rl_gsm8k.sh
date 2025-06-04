@@ -6,14 +6,16 @@ train_file="data/gsm8k_python_sdp.json"
 test_file="data/gsm8k_test_set.json"
 engine='python' # 'python' or 'nl'
 
-model_name_or_path="ppo_paper_final_new/_models_outputs_sft_small/gsm8k_python_sdp_galactica_125m/global_step_1540_epoch_10/"
-tokenizer_name_or_path="ppo_paper_final_new/_models_outputs_sft_small/gsm8k_python_sdp_galactica_125m/global_step_1540_epoch_10/"
-ref_model_name_or_path="ppo_paper_final_new/_models_outputs_sft_small/gsm8k_python_sdp_galactica_125m/global_step_1540_epoch_10/"
+model_name_or_path="ppo_paper_final_new/_models_outputs_sft_small/gsm8k_python_sdp_galactica_125m/best/"
+tokenizer_name_or_path="facebook/galactica-125m"
+#"ppo_paper_final_new/_models_outputs_sft_small/gsm8k_python_sdp_galactica_125m/global_step_1540_epoch_10/"
+ref_model_name_or_path="ppo_paper_final_new/_models_outputs_sft_small/gsm8k_python_sdp_galactica_125m/best/"
+#"ppo_paper_final_new/_models_outputs_sft_small/gsm8k_python_sdp_galactica_125m/global_step_1540_epoch_10/"
 
 keep_num_ckpt='0'
-batch_size="32"
-mini_batch_size="32"
-eval_batch_size="32"
+batch_size="4"
+mini_batch_size="4"
+eval_batch_size="4"
 ppo_epochs="2"
 n_epochs="700"
 num_workers="0"
@@ -39,7 +41,7 @@ wandb_log="True"
 wandb_project="ReFT_small"
 wandb_run_name="${exp_name}"
 
-num_processes='8'
+num_processes='1'
 main_process_port='8888'
 
 mkdir -p "${model_dir}"

@@ -30,6 +30,7 @@ from transformers import AutoTokenizer, AutoModelForCausalLM, get_linear_schedul
 import wandb
 import pandas as pd
 import shutil
+import copy
 tqdm = partial(tqdm, ncols=0, leave=False)
 
 TIMEOUT = 10
@@ -71,12 +72,39 @@ compare_answer_fn_mapper = {
     'mathqa-numeric': lambda extracted_ans, target_answer: abs(extracted_ans - target_answer) <= 1e-2,
 }
 
+def corrupt_training_data(raw_dataset, corruption_fraction=0.5, seed=42):
+    # Work on a copy
+    corrupted = copy.deepcopy(raw_dataset['train'])
+    n = len(corrupted)
+    n_corrupt = int(n * corruption_fraction)
+    rng = random.Random(seed)  # Deterministic corruption for reproducibility
+
+    indices = list(range(n))
+    rng.shuffle(indices)
+    corrupt_indices = indices[:n_corrupt]
+    other_indices = indices[n_corrupt:]
+    # For each selected index, assign a random (but not the same) answer_value/cot from the set
+    for idx in corrupt_indices:
+        # Pick a random, different index
+        possible = [i for i in indices if i != idx]
+        replacement_idx = rng.choice(possible)
+        # Overwrite
+        corrupted[idx]['answer_value'] = raw_dataset['train'][replacement_idx]['answer_value']
+        if 'answer_cot' in corrupted[idx]:
+            corrupted[idx]['answer_cot'] = raw_dataset['train'][replacement_idx].get('answer_cot', None)
+    # Return a new Dataset object
+    return Dataset.from_list(corrupted)
+
 def prepare_datasets_and_data_loaders(args, tokenizer):
     with accelerator.main_process_first():
         raw_dataset = DatasetDict({
-            'train': Dataset.from_list(json.load(open(args['train_file'],'r'))),
-            'test': Dataset.from_list(json.load(open(args['test_file'],'r'))),
+            'train': corrupt_training_data(
+                DatasetDict({'train': Dataset.from_list(json.load(open(args['train_file'],'r')))}),
+                corruption_fraction=0.5, seed=args.get('seed', 42)
+            ),
+            'test': Dataset.from_list(json.load(open(args['test_file'],'r')))
         })
+
         accelerator.print('Raw data:', raw_dataset)
         src_name = raw_dataset['train'][0]['item_id'].split('_')[0]  # e.g., gsm8k_0, gsm8k_1, gsm8k_2, ...
         setup_cot(src_name)
@@ -197,6 +225,8 @@ def prepare_datasets_and_data_loaders(args, tokenizer):
 
     train_dataloader = DataLoader(tokenized_dataset['train'], shuffle=True, batch_size=args['batch_size'], num_workers=args['num_workers'], pin_memory=True, 
                         collate_fn=partial(collate_fn, args=args, tokenizer=tokenizer))
+    
+    
                         
     test_dataloader = DataLoader(tokenized_dataset['test'], shuffle=False, batch_size=args['eval_batch_size'], num_workers=args['num_workers'], pin_memory=True, 
                         collate_fn=partial(collate_fn, args=args, tokenizer=tokenizer))
