@@ -219,7 +219,13 @@ def prepare_datasets_and_data_loaders(args, tokenizer):
             # input_ids.append(item['input_ids'] + [tokenizer.pad_token_id] * (max_input_length - len(item['input_ids'])))
             # attention_mask.append(item['attention_mask'] + [0] * (max_input_length - len(item['attention_mask'])))
             # labels.append(item['labels'] + [-100] * (max_target_length - len(item['labels'])))
-
+            pad_len_input = max_input_length - len(item['input_ids'])
+            input_ids_left_padded.append(
+                [tokenizer.pad_token_id] * pad_len_input + item['input_ids']
+            )
+            attention_mask_left_padded.append(
+                [0] * pad_len_input + item['attention_mask']
+            )
             labels_left_padded.append([-100] * (max_target_length - len(item['labels'])) + item['labels'])
             prefix_left_padded.append([tokenizer.pad_token_id] * (max_prefix_length - len(item['prefix'])) + item['prefix'])
             prefix_attention_mask_left_padded.append(
@@ -243,9 +249,16 @@ def prepare_datasets_and_data_loaders(args, tokenizer):
             'labels': torch.LongTensor(labels_left_padded)
         }
 
+        ppo_offline_forward_kwargs = {
+            'input_ids': torch.LongTensor(input_ids_left_padded),         
+            'attention_mask': torch.BoolTensor(attention_mask_left_padded),
+            'labels': torch.LongTensor(labels_left_padded),                 
+            }
+
         return {
             'ppo_forward_kwargs': ppo_forward_kwargs,
             'generate_prefix_kwargs': generate_prefix_kwargs,
+            'ppo_offline_forward_kwargs': ppo_offline_forward_kwargs,
         }
 
     train_dataloader = DataLoader(tokenized_dataset['train'], shuffle=True, batch_size=args['batch_size'],
@@ -270,6 +283,62 @@ def do_checkpoint(args, model, tokenizer, save_path, most_recent_ckpts_paths=Non
             ckpt_to_be_removed = most_recent_ckpts_paths.pop(0)
             # os.remove(ckpt_to_be_removed)
             shutil.rmtree(ckpt_to_be_removed)
+
+import torch
+import torch.nn.functional as F
+
+def offline_debug_rollout(model, tokenizer, batch):
+
+    model.eval()
+    offline = batch['ppo_offline_forward_kwargs']
+    input_ids_tensor  = offline['input_ids']       # [B, S]
+    attention_tensor  = offline['attention_mask']  # [B, S]
+    labels_tensor     = offline['labels']          # [B, S]
+
+    prompt_texts      = batch['ppo_forward_kwargs']['query']        # list of B strings
+    answer_values     = batch['ppo_forward_kwargs']['answer_values']# list of B answers
+
+    B, S = input_ids_tensor.size()
+
+    with torch.no_grad():
+        # Forward pass: get logits over the vocabulary for every position
+        lm_logits, _, _ = model(input_ids=input_ids_tensor, attention_mask=attention_tensor)
+        logits_off  = lm_logits  # [B, S, VocabSize]
+
+        # Compute log‐softmax across the vocabulary at each position
+        # For a causal LM, logits_off[b, t, :] is the distribution for token at position t,
+        # given everything up to t−1. But to get "log-prob of token at t", we look back one step.
+        logprob_full = F.log_softmax(logits_off, dim=-1)          # [B, S, V]
+        logprob_next = logprob_full[:, :-1, :]                    # [B, S-1, V]
+
+    for b in range(B):
+        prompt = prompt_texts[b]
+        answer = answer_values[b]
+
+        # Identify CoT/EOS token positions (labels_tensor[b, t] != -100)
+        gold_positions = (labels_tensor[b] != -100).nonzero(as_tuple=True)[0]
+
+        total_logprob = 0.0
+        # Sum log‐probabilities of every CoT token (skip any pos == 0)
+        for pos in gold_positions:
+            t = pos.item()
+            if t == 0:
+                # t=0 would be first token of input; typically part of prompt, so skip
+                continue
+            token_id = labels_tensor[b, t].item()
+            logp     = logprob_next[b, t - 1, token_id].item()
+            total_logprob += logp
+           
+            #Print the decoded token
+            decoded_token = tokenizer.decode(token_id, skip_special_tokens=True)
+            print(f"Decoded token: \"{decoded_token}\", log‐prob: {logp:.4f}, position: {t}")
+
+        print(f"Example {b}:")
+        print(f"  Prompt: \"{prompt}\"")
+        print(f"  Answer: \"{answer}\"")
+        print(f"  Total log‐prob of gold CoT tokens: {total_logprob:.4f}")
+        print("-" * 50)
+
 
 def rollout(args, model, ref_model, tokenizer, query_tensors, query_tensors_attention_mask, answer_values, src_name):
     model.eval()
@@ -414,6 +483,8 @@ def train_one_epoch(args, model, ref_model, train_dataset, train_dataloader, opt
                 answer_values=batch['ppo_forward_kwargs']['answer_values'],
                 src_name=train_dataset[0]['item_id'].split('_')[0],
             )
+            # Debug
+            offline_debug_rollout(model, tokenizer, batch)
             model.train()
             # preprocess
             raw_adv = adv

@@ -1,518 +1,54 @@
-wandb: Currently logged in as: abhinavj98 (pruning-rl) to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
-wandb: Tracking run with wandb version 0.19.10
-wandb: Run data is saved locally in /nfs/hpc/share/jainab/AI539/prject/mwp_ReFT/wandb/run-20250602_193907-rmw75r95
-wandb: Run `wandb offline` to turn off syncing.
-wandb: Syncing run gsm8k_python_sdp_galactica_125m_reft
-wandb: ⭐️ View project at https://wandb.ai/pruning-rl/ReFT_small
-wandb: 🚀 View run at https://wandb.ai/pruning-rl/ReFT_small/runs/rmw75r95
-Map:   0%|          | 0/7356 [00:00<?, ? examples/s]Map:  14%|█▎        | 1000/7356 [00:01<00:08, 786.52 examples/s]Map:  27%|██▋       | 2000/7356 [00:02<00:06, 771.96 examples/s]Map:  41%|████      | 3000/7356 [00:03<00:05, 768.58 examples/s]Map:  54%|█████▍    | 4000/7356 [00:05<00:04, 757.20 examples/s]Map:  68%|██████▊   | 5000/7356 [00:06<00:03, 739.24 examples/s]Map:  82%|████████▏ | 6000/7356 [00:08<00:01, 735.66 examples/s]Map:  95%|█████████▌| 7000/7356 [00:09<00:00, 738.02 examples/s]Map: 100%|██████████| 7356/7356 [00:09<00:00, 733.24 examples/s]Map: 100%|██████████| 7356/7356 [00:09<00:00, 744.46 examples/s]
-Map:   0%|          | 0/1319 [00:00<?, ? examples/s]Map:  76%|███████▌  | 1000/1319 [00:00<00:00, 1223.01 examples/s]Map: 100%|██████████| 1319/1319 [00:01<00:00, 1200.63 examples/s]Map: 100%|██████████| 1319/1319 [00:01<00:00, 1201.54 examples/s]
-  0% 0/700 [00:00<?, ?it/s]
-Train Loop:   0% 0/1839 [00:00<?, ?it/s][A
-Train Loop:   0% 1/1839 [00:03<1:56:41,  3.81s/it][A
-Train Loop:   0% 2/1839 [00:05<1:27:02,  2.84s/it][A
-Train Loop:   0% 3/1839 [00:08<1:17:03,  2.52s/it][A
-Train Loop:   0% 4/1839 [00:10<1:11:09,  2.33s/it][A
-Train Loop:   0% 5/1839 [00:11<1:04:44,  2.12s/it][Awandb: WARNING Tried to log to step 2 that is less than the current step 3. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 3 that is less than the current step 5. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 4 that is less than the current step 7. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 5 that is less than the current step 9. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   0% 6/1839 [00:14<1:04:40,  2.12s/it][A
-Train Loop:   0% 7/1839 [00:15<1:02:34,  2.05s/it][A
-Train Loop:   0% 8/1839 [00:18<1:04:04,  2.10s/it][A
-Train Loop:   0% 9/1839 [00:20<1:05:26,  2.15s/it][Awandb: WARNING Tried to log to step 6 that is less than the current step 11. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 7 that is less than the current step 13. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 8 that is less than the current step 15. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 9 that is less than the current step 17. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   1% 10/1839 [00:23<1:14:55,  2.46s/it][A
-Train Loop:   1% 11/1839 [00:26<1:15:08,  2.47s/it][A
-Train Loop:   1% 12/1839 [00:28<1:15:34,  2.48s/it][A
-Train Loop:   1% 13/1839 [00:30<1:13:30,  2.42s/it][Awandb: WARNING Tried to log to step 10 that is less than the current step 19. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 11 that is less than the current step 21. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 12 that is less than the current step 23. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 13 that is less than the current step 25. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   1% 14/1839 [00:33<1:20:23,  2.64s/it][A
-Train Loop:   1% 15/1839 [00:36<1:22:17,  2.71s/it][A
-Train Loop:   1% 16/1839 [00:39<1:20:10,  2.64s/it][A
-Train Loop:   1% 17/1839 [00:41<1:19:56,  2.63s/it][Awandb: WARNING Tried to log to step 14 that is less than the current step 27. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 15 that is less than the current step 29. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 16 that is less than the current step 31. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 17 that is less than the current step 33. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   1% 18/1839 [00:44<1:19:12,  2.61s/it][A
-Train Loop:   1% 19/1839 [00:46<1:16:40,  2.53s/it][A
-Train Loop:   1% 20/1839 [00:49<1:17:02,  2.54s/it][A
-Train Loop:   1% 21/1839 [00:51<1:13:26,  2.42s/it][Awandb: WARNING Tried to log to step 18 that is less than the current step 35. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 19 that is less than the current step 37. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 20 that is less than the current step 39. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 21 that is less than the current step 41. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   1% 22/1839 [00:53<1:11:32,  2.36s/it][A
-Train Loop:   1% 23/1839 [00:55<1:07:47,  2.24s/it][A
-Train Loop:   1% 24/1839 [00:57<1:07:00,  2.21s/it][A
-Train Loop:   1% 25/1839 [01:00<1:07:11,  2.22s/it][Awandb: WARNING Tried to log to step 22 that is less than the current step 43. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 23 that is less than the current step 45. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 24 that is less than the current step 47. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 25 that is less than the current step 49. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   1% 26/1839 [01:02<1:09:45,  2.31s/it][A
-Train Loop:   1% 27/1839 [01:04<1:07:41,  2.24s/it][A
-Train Loop:   2% 28/1839 [01:06<1:05:37,  2.17s/it][A
-Train Loop:   2% 29/1839 [01:09<1:08:06,  2.26s/it][A
-Train Loop:   2% 30/1839 [01:11<1:05:56,  2.19s/it][Awandb: WARNING Tried to log to step 26 that is less than the current step 51. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 27 that is less than the current step 53. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 28 that is less than the current step 55. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 29 that is less than the current step 57. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 30 that is less than the current step 59. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   2% 31/1839 [01:13<1:06:11,  2.20s/it][A
-Train Loop:   2% 32/1839 [01:15<1:07:08,  2.23s/it][A
-Train Loop:   2% 33/1839 [01:17<1:07:19,  2.24s/it][A
-Train Loop:   2% 34/1839 [01:21<1:15:30,  2.51s/it][Awandb: WARNING Tried to log to step 31 that is less than the current step 61. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 32 that is less than the current step 63. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 33 that is less than the current step 65. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 34 that is less than the current step 67. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   2% 35/1839 [01:22<1:07:18,  2.24s/it][A
-Train Loop:   2% 36/1839 [01:24<1:04:48,  2.16s/it][A
-Train Loop:   2% 37/1839 [01:26<1:02:25,  2.08s/it][A
-Train Loop:   2% 38/1839 [01:28<1:02:34,  2.08s/it][A
-Train Loop:   2% 39/1839 [01:30<1:00:45,  2.03s/it][Awandb: WARNING Tried to log to step 35 that is less than the current step 69. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 36 that is less than the current step 71. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 37 that is less than the current step 73. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 38 that is less than the current step 75. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 39 that is less than the current step 77. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   2% 40/1839 [01:32<1:02:21,  2.08s/it][A
-Train Loop:   2% 41/1839 [01:34<58:08,  1.94s/it]  [A
-Train Loop:   2% 42/1839 [01:37<1:11:50,  2.40s/it][A
-Train Loop:   2% 43/1839 [01:40<1:11:09,  2.38s/it][Awandb: WARNING Tried to log to step 40 that is less than the current step 79. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 41 that is less than the current step 81. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 42 that is less than the current step 83. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 43 that is less than the current step 85. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   2% 44/1839 [01:43<1:17:33,  2.59s/it][A
-Train Loop:   2% 45/1839 [01:45<1:15:03,  2.51s/it][A
-Train Loop:   3% 46/1839 [01:47<1:08:57,  2.31s/it][A
-Train Loop:   3% 47/1839 [01:50<1:12:00,  2.41s/it][A
-Train Loop:   3% 48/1839 [01:51<1:05:24,  2.19s/it][Awandb: WARNING Tried to log to step 44 that is less than the current step 87. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 45 that is less than the current step 89. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 46 that is less than the current step 91. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 47 that is less than the current step 93. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 48 that is less than the current step 95. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   3% 49/1839 [01:53<1:02:04,  2.08s/it][A
-Train Loop:   3% 50/1839 [01:55<1:04:35,  2.17s/it][A
-Train Loop:   3% 51/1839 [01:58<1:07:44,  2.27s/it][A
-Train Loop:   3% 52/1839 [02:00<1:06:04,  2.22s/it][Awandb: WARNING Tried to log to step 49 that is less than the current step 97. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 50 that is less than the current step 99. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 51 that is less than the current step 101. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 52 that is less than the current step 103. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   3% 53/1839 [02:02<1:05:12,  2.19s/it][A
-Train Loop:   3% 54/1839 [02:04<1:01:46,  2.08s/it][A
-Train Loop:   3% 55/1839 [02:06<1:01:35,  2.07s/it][A
-Train Loop:   3% 56/1839 [02:08<1:01:40,  2.08s/it][A
-Train Loop:   3% 57/1839 [02:10<59:08,  1.99s/it]  [Awandb: WARNING Tried to log to step 53 that is less than the current step 105. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 54 that is less than the current step 107. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 55 that is less than the current step 109. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 56 that is less than the current step 111. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 57 that is less than the current step 113. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   3% 58/1839 [02:13<1:07:08,  2.26s/it][A
-Train Loop:   3% 59/1839 [02:15<1:10:27,  2.38s/it][A
-Train Loop:   3% 60/1839 [02:18<1:08:17,  2.30s/it][A
-Train Loop:   3% 61/1839 [02:20<1:04:54,  2.19s/it][A
-Train Loop:   3% 62/1839 [02:22<1:02:59,  2.13s/it][Awandb: WARNING Tried to log to step 58 that is less than the current step 115. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 59 that is less than the current step 117. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 60 that is less than the current step 119. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 61 that is less than the current step 121. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 62 that is less than the current step 123. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   3% 63/1839 [02:23<59:54,  2.02s/it]  [A
-Train Loop:   3% 64/1839 [02:26<1:03:16,  2.14s/it][A
-Train Loop:   4% 65/1839 [02:28<1:06:38,  2.25s/it][A
-Train Loop:   4% 66/1839 [02:30<1:02:18,  2.11s/it][Awandb: WARNING Tried to log to step 63 that is less than the current step 125. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 64 that is less than the current step 127. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 65 that is less than the current step 129. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 66 that is less than the current step 131. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   4% 67/1839 [02:32<1:01:50,  2.09s/it][A
-Train Loop:   4% 68/1839 [02:34<1:02:38,  2.12s/it][A
-Train Loop:   4% 69/1839 [02:37<1:05:11,  2.21s/it][A
-Train Loop:   4% 70/1839 [02:39<1:06:23,  2.25s/it][A
-Train Loop:   4% 71/1839 [02:42<1:09:38,  2.36s/it][Awandb: WARNING Tried to log to step 67 that is less than the current step 133. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 68 that is less than the current step 135. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 69 that is less than the current step 137. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 70 that is less than the current step 139. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 71 that is less than the current step 141. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   4% 72/1839 [02:45<1:15:45,  2.57s/it][A
-Train Loop:   4% 73/1839 [02:47<1:10:13,  2.39s/it][A
-Train Loop:   4% 74/1839 [02:49<1:08:36,  2.33s/it][A
-Train Loop:   4% 75/1839 [02:51<1:07:47,  2.31s/it][Awandb: WARNING Tried to log to step 72 that is less than the current step 143. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 73 that is less than the current step 145. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 74 that is less than the current step 147. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 75 that is less than the current step 149. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   4% 76/1839 [02:53<1:07:51,  2.31s/it][A
-Train Loop:   4% 77/1839 [02:56<1:11:23,  2.43s/it][A
-Train Loop:   4% 78/1839 [02:58<1:07:35,  2.30s/it][A
-Train Loop:   4% 79/1839 [03:01<1:09:55,  2.38s/it][Awandb: WARNING Tried to log to step 76 that is less than the current step 151. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 77 that is less than the current step 153. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 78 that is less than the current step 155. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 79 that is less than the current step 157. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   4% 80/1839 [03:03<1:13:28,  2.51s/it][A
-Train Loop:   4% 81/1839 [03:06<1:09:16,  2.36s/it][A
-Train Loop:   4% 82/1839 [03:08<1:08:33,  2.34s/it][A
-Train Loop:   5% 83/1839 [03:10<1:05:37,  2.24s/it][Awandb: WARNING Tried to log to step 80 that is less than the current step 159. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 81 that is less than the current step 161. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 82 that is less than the current step 163. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 83 that is less than the current step 165. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   5% 84/1839 [03:12<1:06:05,  2.26s/it][A
-Train Loop:   5% 85/1839 [03:14<1:05:15,  2.23s/it][A
-Train Loop:   5% 86/1839 [03:17<1:05:53,  2.26s/it][A
-Train Loop:   5% 87/1839 [03:19<1:07:23,  2.31s/it][A
-Train Loop:   5% 88/1839 [03:21<1:05:49,  2.26s/it][Awandb: WARNING Tried to log to step 84 that is less than the current step 167. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 85 that is less than the current step 169. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 86 that is less than the current step 171. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 87 that is less than the current step 173. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 88 that is less than the current step 175. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   5% 89/1839 [03:24<1:09:37,  2.39s/it][A
-Train Loop:   5% 90/1839 [03:26<1:06:54,  2.30s/it][A
-Train Loop:   5% 91/1839 [03:28<1:05:04,  2.23s/it][A
-Train Loop:   5% 92/1839 [03:30<1:00:57,  2.09s/it][Awandb: WARNING Tried to log to step 89 that is less than the current step 177. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 90 that is less than the current step 179. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 91 that is less than the current step 181. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 92 that is less than the current step 183. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   5% 93/1839 [03:32<1:00:33,  2.08s/it][A
-Train Loop:   5% 94/1839 [03:34<1:00:10,  2.07s/it][A
-Train Loop:   5% 95/1839 [03:36<1:01:00,  2.10s/it][A
-Train Loop:   5% 96/1839 [03:38<1:02:48,  2.16s/it][A
-Train Loop:   5% 97/1839 [03:40<58:37,  2.02s/it]  [Awandb: WARNING Tried to log to step 93 that is less than the current step 185. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 94 that is less than the current step 187. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 95 that is less than the current step 189. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 96 that is less than the current step 191. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 97 that is less than the current step 193. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   5% 98/1839 [03:43<1:05:09,  2.25s/it][A
-Train Loop:   5% 99/1839 [03:45<1:02:29,  2.15s/it][A
-Train Loop:   5% 100/1839 [03:47<1:00:52,  2.10s/it][A
-Train Loop:   5% 101/1839 [03:49<58:58,  2.04s/it]  [A
-Train Loop:   6% 102/1839 [03:51<1:01:21,  2.12s/it][Awandb: WARNING Tried to log to step 98 that is less than the current step 195. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 99 that is less than the current step 197. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 100 that is less than the current step 199. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 101 that is less than the current step 201. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 102 that is less than the current step 203. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   6% 103/1839 [03:53<1:03:22,  2.19s/it][A
-Train Loop:   6% 104/1839 [03:55<1:02:29,  2.16s/it][A
-Train Loop:   6% 105/1839 [03:58<1:02:36,  2.17s/it][A
-Train Loop:   6% 106/1839 [04:00<1:03:13,  2.19s/it][A
-Train Loop:   6% 107/1839 [04:02<59:35,  2.06s/it]  [Awandb: WARNING Tried to log to step 103 that is less than the current step 205. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 104 that is less than the current step 207. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 105 that is less than the current step 209. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 106 that is less than the current step 211. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 107 that is less than the current step 213. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   6% 108/1839 [04:04<1:03:08,  2.19s/it][A
-Train Loop:   6% 109/1839 [04:06<1:00:43,  2.11s/it][A
-Train Loop:   6% 110/1839 [04:08<58:12,  2.02s/it]  [A
-Train Loop:   6% 111/1839 [04:10<58:53,  2.04s/it][Awandb: WARNING Tried to log to step 108 that is less than the current step 215. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 109 that is less than the current step 217. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 110 that is less than the current step 219. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 111 that is less than the current step 221. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   6% 112/1839 [04:12<1:01:07,  2.12s/it][A
-Train Loop:   6% 113/1839 [04:15<1:03:58,  2.22s/it][A
-Train Loop:   6% 114/1839 [04:17<1:04:23,  2.24s/it][A
-Train Loop:   6% 115/1839 [04:19<1:03:03,  2.19s/it][A
-Train Loop:   6% 116/1839 [04:21<1:02:17,  2.17s/it][Awandb: WARNING Tried to log to step 112 that is less than the current step 223. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 113 that is less than the current step 225. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 114 that is less than the current step 227. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 115 that is less than the current step 229. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 116 that is less than the current step 231. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   6% 117/1839 [04:24<1:04:45,  2.26s/it][A
-Train Loop:   6% 118/1839 [04:25<1:00:51,  2.12s/it][A
-Train Loop:   6% 119/1839 [04:28<1:03:50,  2.23s/it][A
-Train Loop:   7% 120/1839 [04:30<1:00:48,  2.12s/it][Awandb: WARNING Tried to log to step 117 that is less than the current step 233. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 118 that is less than the current step 235. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 119 that is less than the current step 237. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 120 that is less than the current step 239. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   7% 121/1839 [04:32<1:00:26,  2.11s/it][A
-Train Loop:   7% 122/1839 [04:34<59:20,  2.07s/it]  [A
-Train Loop:   7% 123/1839 [04:36<1:02:00,  2.17s/it][A
-Train Loop:   7% 124/1839 [04:39<1:04:56,  2.27s/it][A
-Train Loop:   7% 125/1839 [04:41<1:04:10,  2.25s/it][Awandb: WARNING Tried to log to step 121 that is less than the current step 241. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 122 that is less than the current step 243. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 123 that is less than the current step 245. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 124 that is less than the current step 247. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 125 that is less than the current step 249. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   7% 126/1839 [04:43<1:00:26,  2.12s/it][A
-Train Loop:   7% 127/1839 [04:45<59:57,  2.10s/it]  [A
-Train Loop:   7% 128/1839 [04:47<1:01:58,  2.17s/it][A
-Train Loop:   7% 129/1839 [04:49<1:01:51,  2.17s/it][A
-Train Loop:   7% 130/1839 [04:51<1:00:14,  2.11s/it][Awandb: WARNING Tried to log to step 126 that is less than the current step 251. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 127 that is less than the current step 253. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 128 that is less than the current step 255. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 129 that is less than the current step 257. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 130 that is less than the current step 259. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   7% 131/1839 [04:53<1:00:49,  2.14s/it][A
-Train Loop:   7% 132/1839 [04:56<1:01:01,  2.14s/it][A
-Train Loop:   7% 133/1839 [04:57<56:48,  2.00s/it]  [A
-Train Loop:   7% 134/1839 [04:59<58:12,  2.05s/it][Awandb: WARNING Tried to log to step 131 that is less than the current step 261. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 132 that is less than the current step 263. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 133 that is less than the current step 265. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 134 that is less than the current step 267. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   7% 135/1839 [05:02<1:00:16,  2.12s/it][A
-Train Loop:   7% 136/1839 [05:04<59:53,  2.11s/it]  [A
-Train Loop:   7% 137/1839 [05:06<57:26,  2.03s/it][A
-Train Loop:   8% 138/1839 [05:08<1:02:09,  2.19s/it][A
-Train Loop:   8% 139/1839 [05:11<1:02:36,  2.21s/it][Awandb: WARNING Tried to log to step 135 that is less than the current step 269. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 136 that is less than the current step 271. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 137 that is less than the current step 273. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 138 that is less than the current step 275. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 139 that is less than the current step 277. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   8% 140/1839 [05:13<1:02:23,  2.20s/it][A
-Train Loop:   8% 141/1839 [05:15<1:00:35,  2.14s/it][A
-Train Loop:   8% 142/1839 [05:17<1:00:56,  2.15s/it][A
-Train Loop:   8% 143/1839 [05:19<59:58,  2.12s/it]  [A
-Train Loop:   8% 144/1839 [05:21<1:01:53,  2.19s/it][Awandb: WARNING Tried to log to step 140 that is less than the current step 279. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 141 that is less than the current step 281. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 142 that is less than the current step 283. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 143 that is less than the current step 285. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 144 that is less than the current step 287. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-
-Train Loop:   8% 145/1839 [05:23<1:00:37,  2.15s/it][A
-Train Loop:   8% 146/1839 [05:25<57:42,  2.05s/it]  [Aterminate called after throwing an instance of 'c10::Error'
-terminate called after throwing an instance of 'c10::Error'
-terminate called after throwing an instance of 'c10::Error'
-  what():    what():  CUDA error: initialization error
-CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
-For debugging consider passing CUDA_LAUNCH_BLOCKING=1.
-Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
-
-Exception raised from c10_cuda_check_implementation at ../c10/cuda/CUDAException.cpp:44 (most recent call first):
-frame #0: c10::Error::Error(c10::SourceLocation, std::string) + 0x57 (0x1494f7e464d7 in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libc10.so)
-frame #1: c10::detail::torchCheckFail(char const*, char const*, unsigned int, std::string const&) + 0x64 (0x1494f7e1036b in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libc10.so)
-frame #2: c10::cuda::c10_cuda_check_implementation(int, char const*, char const*, int, bool) + 0x118 (0x1494f7ee2b58 in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libc10_cuda.so)
-frame #3: <unknown function> + 0x1c1ae (0x1494f7eb31ae in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libc10_cuda.so)
-frame #4: <unknown function> + 0x2b930 (0x1494f7ec2930 in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libc10_cuda.so)
-frame #5: <unknown function> + 0x4d59f6 (0x14954ed7b9f6 in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libtorch_python.so)
-frame #6: <unknown function> + 0x3ee77 (0x1494f7e2be77 in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libc10.so)
-frame #7: c10::TensorImpl::~TensorImpl() + 0x1be (0x1494f7e2469e in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libc10.so)
-frame #8: c10::TensorImpl::~TensorImpl() + 0x9 (0x1494f7e247b9 in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libc10.so)
-frame #9: <unknown function> + 0x75afa8 (0x14954f000fa8 in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libtorch_python.so)
-frame #10: THPVariable_subclass_dealloc(_object*) + 0x305 (0x14954f001335 in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libtorch_python.so)
-frame #11: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x4f8488]
-frame #12: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x4f8595]
-frame #13: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x4f8595]
-frame #14: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x508099]
-frame #15: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x4e495f]
-frame #16: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x5ce973]
-frame #17: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x4ec2d6]
-frame #18: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x55d10b]
-frame #19: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x4e2ca4]
-frame #20: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x59157c]
-frame #21: PyType_GenericAlloc + 0x304 (0x4e12e4 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #22: PySet_New + 0x17 (0x5134c7 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #23: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x54cabb]
-frame #24: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x54d678]
-frame #25: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x5b9b39]
-frame #26: _PyAST_Compile + 0x188 (0x5b8748 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #27: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x5c2554]
-frame #28: PyRun_StringFlags + 0x7b (0x5ba70b in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #29: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x59c577]
-frame #30: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x4ff4b4]
-frame #31: _PyEval_EvalFrameDefault + 0x31f (0x4ef97f in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #32: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #33: _PyEval_EvalFrameDefault + 0x2a50 (0x4f20b0 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #34: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #35: _PyEval_EvalFrameDefault + 0x2a50 (0x4f20b0 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #36: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #37: _PyEval_EvalFrameDefault + 0x2a50 (0x4f20b0 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #38: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #39: _PyEval_EvalFrameDefault + 0x731 (0x4efd91 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #40: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x50a6de]
-frame #41: _PyEval_EvalFrameDefault + 0x13b2 (0x4f0a12 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #42: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #43: _PyEval_EvalFrameDefault + 0x731 (0x4efd91 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #44: _PyObject_FastCallDictTstate + 0xcd (0x4f7d4d in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #45: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x508428]
-frame #46: _PyObject_MakeTpCall + 0x2ab (0x4f88cb in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #47: _PyEval_EvalFrameDefault + 0x4deb (0x4f444b in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #48: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #49: _PyEval_EvalFrameDefault + 0x4b2c (0x4f418c in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #50: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #51: _PyEval_EvalFrameDefault + 0x4b2c (0x4f418c in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #52: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #53: _PyEval_EvalFrameDefault + 0x731 (0x4efd91 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #54: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #55: _PyEval_EvalFrameDefault + 0x31f (0x4ef97f in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #56: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #57: _PyEval_EvalFrameDefault + 0x731 (0x4efd91 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #58: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #59: _PyEval_EvalFrameDefault + 0x731 (0x4efd91 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #60: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #61: _PyEval_EvalFrameDefault + 0x731 (0x4efd91 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #62: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #63: _PyEval_EvalFrameDefault + 0x731 (0x4efd91 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-CUDA error: initialization error
-CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
-For debugging consider passing CUDA_LAUNCH_BLOCKING=1.
-Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
-
-Exception raised from c10_cuda_check_implementation at ../c10/cuda/CUDAException.cpp:44 (most recent call first):
-frame #0: c10::Error::Error(c10::SourceLocation, std::string) + 0x57 (0x1494f7e464d7 in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libc10.so)
-frame #1: c10::detail::torchCheckFail(char const*, char const*, unsigned int, std::string const&) + 0x64 (0x1494f7e1036b in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libc10.so)
-frame #2: c10::cuda::c10_cuda_check_implementation(int, char const*, char const*, int, bool) + 0x118 (0x1494f7ee2b58 in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libc10_cuda.so)
-frame #3: <unknown function> + 0x1c1ae (0x1494f7eb31ae in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libc10_cuda.so)
-frame #4: <unknown function> + 0x2b930 (0x1494f7ec2930 in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libc10_cuda.so)
-frame #5: <unknown function> + 0x4d59f6 (0x14954ed7b9f6 in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libtorch_python.so)
-frame #6: <unknown function> + 0x3ee77 (0x1494f7e2be77 in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libc10.so)
-frame #7: c10::TensorImpl::~TensorImpl() + 0x1be (0x1494f7e2469e in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libc10.so)
-frame #8: c10::TensorImpl::~TensorImpl() + 0x9 (0x1494f7e247b9 in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libc10.so)
-frame #9: <unknown function> + 0x75afa8 (0x14954f000fa8 in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libtorch_python.so)
-frame #10: THPVariable_subclass_dealloc(_object*) + 0x305 (0x14954f001335 in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libtorch_python.so)
-frame #11: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x4f8488]
-frame #12: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x4f8595]
-frame #13: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x4f8595]
-frame #14: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x508099]
-frame #15: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x4e495f]
-frame #16: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x5ce973]
-frame #17: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x4ec2d6]
-frame #18: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x55d10b]
-frame #19: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x4e2ca4]
-frame #20: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x59157c]
-frame #21: PyType_GenericAlloc + 0x304 (0x4e12e4 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #22: _PyObject_MakeTpCall + 0x193 (0x4f87b3 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #23: _PyEval_EvalFrameDefault + 0x4deb (0x4f444b in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #24: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x50a6de]
-frame #25: _PyEval_EvalFrameDefault + 0x4b2c (0x4f418c in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #26: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #27: _PyEval_EvalFrameDefault + 0x731 (0x4efd91 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #28: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #29: _PyEval_EvalFrameDefault + 0x4b2c (0x4f418c in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #30: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #31: _PyEval_EvalFrameDefault + 0x31f (0x4ef97f in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #32: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #33: _PyEval_EvalFrameDefault + 0x31f (0x4ef97f in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #34: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x511d9f]
-frame #35: _PyEval_EvalFrameDefault + 0x9fc (0x4f005c in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #36: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #37: _PyEval_EvalFrameDefault + 0x2a50 (0x4f20b0 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #38: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #39: _PyEval_EvalFrameDefault + 0x731 (0x4efd91 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #40: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x50a6de]
-frame #41: _PyEval_EvalFrameDefault + 0x13b2 (0x4f0a12 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #42: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #43: _PyEval_EvalFrameDefault + 0x731 (0x4efd91 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #44: _PyObject_FastCallDictTstate + 0xcd (0x4f7d4d in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #45: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x508428]
-frame #46: _PyObject_MakeTpCall + 0x2ab (0x4f88cb in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #47: _PyEval_EvalFrameDefault + 0x4deb (0x4f444b in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #48: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #49: _PyEval_EvalFrameDefault + 0x4b2c (0x4f418c in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #50: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #51: _PyEval_EvalFrameDefault + 0x4b2c (0x4f418c in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #52: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #53: _PyEval_EvalFrameDefault + 0x731 (0x4efd91 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #54: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #55: _PyEval_EvalFrameDefault + 0x31f (0x4ef97f in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #56: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #57: _PyEval_EvalFrameDefault + 0x731 (0x4efd91 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #58: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #59: _PyEval_EvalFrameDefault + 0x731 (0x4efd91 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #60: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #61: _PyEval_EvalFrameDefault + 0x731 (0x4efd91 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #62: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #63: _PyEval_EvalFrameDefault + 0x731 (0x4efd91 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-
-
-  what():  CUDA error: initialization error
-CUDA kernel errors might be asynchronously reported at some other API call, so the stacktrace below might be incorrect.
-For debugging consider passing CUDA_LAUNCH_BLOCKING=1.
-Compile with `TORCH_USE_CUDA_DSA` to enable device-side assertions.
-
-Exception raised from c10_cuda_check_implementation at ../c10/cuda/CUDAException.cpp:44 (most recent call first):
-frame #0: c10::Error::Error(c10::SourceLocation, std::string) + 0x57 (0x1494f7e464d7 in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libc10.so)
-frame #1: c10::detail::torchCheckFail(char const*, char const*, unsigned int, std::string const&) + 0x64 (0x1494f7e1036b in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libc10.so)
-frame #2: c10::cuda::c10_cuda_check_implementation(int, char const*, char const*, int, bool) + 0x118 (0x1494f7ee2b58 in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libc10_cuda.so)
-frame #3: <unknown function> + 0x1c1ae (0x1494f7eb31ae in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libc10_cuda.so)
-frame #4: <unknown function> + 0x2b930 (0x1494f7ec2930 in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libc10_cuda.so)
-frame #5: <unknown function> + 0x4d59f6 (0x14954ed7b9f6 in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libtorch_python.so)
-frame #6: <unknown function> + 0x3ee77 (0x1494f7e2be77 in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libc10.so)
-frame #7: c10::TensorImpl::~TensorImpl() + 0x1be (0x1494f7e2469e in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libc10.so)
-frame #8: c10::TensorImpl::~TensorImpl() + 0x9 (0x1494f7e247b9 in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libc10.so)
-frame #9: <unknown function> + 0x75afa8 (0x14954f000fa8 in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libtorch_python.so)
-frame #10: THPVariable_subclass_dealloc(_object*) + 0x305 (0x14954f001335 in /nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/lib/libtorch_python.so)
-frame #11: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x4f8488]
-frame #12: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x4f8595]
-frame #13: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x4f8595]
-frame #14: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x508099]
-frame #15: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x4e495f]
-frame #16: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x5ce973]
-frame #17: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x4ec2d6]
-frame #18: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x55d10b]
-frame #19: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x4e2ca4]
-frame #20: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x59157c]
-frame #21: PyType_GenericAlloc + 0x304 (0x4e12e4 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #22: PySet_New + 0x17 (0x5134c7 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #23: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x54caa6]
-frame #24: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x54d678]
-frame #25: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x5b9b39]
-frame #26: _PyAST_Compile + 0x188 (0x5b8748 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #27: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x5c2554]
-frame #28: PyRun_StringFlags + 0x7b (0x5ba70b in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #29: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x59c577]
-frame #30: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x4ff4b4]
-frame #31: _PyEval_EvalFrameDefault + 0x31f (0x4ef97f in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #32: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #33: _PyEval_EvalFrameDefault + 0x2a50 (0x4f20b0 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #34: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #35: _PyEval_EvalFrameDefault + 0x2a50 (0x4f20b0 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #36: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #37: _PyEval_EvalFrameDefault + 0x2a50 (0x4f20b0 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #38: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #39: _PyEval_EvalFrameDefault + 0x731 (0x4efd91 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #40: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x50a6de]
-frame #41: _PyEval_EvalFrameDefault + 0x13b2 (0x4f0a12 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #42: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #43: _PyEval_EvalFrameDefault + 0x731 (0x4efd91 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #44: _PyObject_FastCallDictTstate + 0xcd (0x4f7d4d in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #45: /nfs/hpc/share/jainab/AI539/env/bin/python() [0x508428]
-frame #46: _PyObject_MakeTpCall + 0x2ab (0x4f88cb in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #47: _PyEval_EvalFrameDefault + 0x4deb (0x4f444b in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #48: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #49: _PyEval_EvalFrameDefault + 0x4b2c (0x4f418c in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #50: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #51: _PyEval_EvalFrameDefault + 0x4b2c (0x4f418c in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #52: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #53: _PyEval_EvalFrameDefault + 0x731 (0x4efd91 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #54: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #55: _PyEval_EvalFrameDefault + 0x31f (0x4ef97f in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #56: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #57: _PyEval_EvalFrameDefault + 0x731 (0x4efd91 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #58: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #59: _PyEval_EvalFrameDefault + 0x731 (0x4efd91 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #60: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #61: _PyEval_EvalFrameDefault + 0x731 (0x4efd91 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #62: _PyFunction_Vectorcall + 0x6f (0x4ff2cf in /nfs/hpc/share/jainab/AI539/env/bin/python)
-frame #63: _PyEval_EvalFrameDefault + 0x731 (0x4efd91 in /nfs/hpc/share/jainab/AI539/env/bin/python)
-
-wandb: WARNING Tried to log to step 145 that is less than the current step 289. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-wandb: WARNING Tried to log to step 146 that is less than the current step 291. Steps must be monotonically increasing, so this data will be ignored. See https://wandb.me/define-metric to log data out of order.
-slurmstepd: error: *** JOB 18738007 ON dgx2-1 CANCELLED AT 2025-06-03T19:39:12 DUE TO TIME LIMIT ***
+/nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/cuda/__init__.py:107: UserWarning: CUDA initialization: Unexpected error from cudaGetDeviceCount(). Did you run some cuda functions before calling NumCudaDevices() that might have already set an error? Error 805: MPS client failed to connect to the MPS control daemon or the MPS server (Triggered internally at ../c10/cuda/CUDAFunctions.cpp:109.)
+  return torch._C._cuda_getDeviceCount() > 0
+Traceback (most recent call last):
+  File "/nfs/hpc/share/jainab/AI539/prject/mwp_ReFT/train_rl_reft.py", line 943, in <module>
+    accelerator = Accelerator(kwargs_handlers=[InitProcessGroupKwargs(timeout=timedelta(seconds=18000))])
+  File "/nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/accelerate/accelerator.py", line 369, in __init__
+    self.state = AcceleratorState(
+  File "/nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/accelerate/state.py", line 732, in __init__
+    PartialState(cpu, **kwargs)
+  File "/nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/accelerate/state.py", line 180, in __init__
+    dist.init_distributed(dist_backend=self.backend, auto_mpi_discovery=False, **kwargs)
+  File "/nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/deepspeed/comm/comm.py", line 670, in init_distributed
+    cdb = TorchBackend(dist_backend, timeout, init_method, rank, world_size)
+  File "/nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/deepspeed/comm/torch.py", line 120, in __init__
+    self.init_process_group(backend, timeout, init_method, rank, world_size)
+  File "/nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/deepspeed/comm/torch.py", line 146, in init_process_group
+    torch.distributed.init_process_group(backend,
+  File "/nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py", line 895, in init_process_group
+    default_pg = _new_process_group_helper(
+  File "/nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/distributed/distributed_c10d.py", line 1009, in _new_process_group_helper
+    backend_class = ProcessGroupNCCL(backend_prefix_store, group_rank, group_size, pg_options)
+RuntimeError: ProcessGroupNCCL is only supported with GPUs, no GPUs found!
+ERROR:torch.distributed.elastic.multiprocessing.api:failed (exitcode: 1) local_rank: 0 (pid: 1206795) of binary: /nfs/hpc/share/jainab/AI539/env/bin/python
+Traceback (most recent call last):
+  File "/nfs/hpc/share/jainab/AI539/env/bin/accelerate", line 8, in <module>
+    sys.exit(main())
+  File "/nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/accelerate/commands/accelerate_cli.py", line 47, in main
+    args.func(args)
+  File "/nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/accelerate/commands/launch.py", line 971, in launch_command
+    deepspeed_launcher(args)
+  File "/nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/accelerate/commands/launch.py", line 687, in deepspeed_launcher
+    distrib_run.run(args)
+  File "/nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/distributed/run.py", line 785, in run
+    elastic_launch(
+  File "/nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 134, in __call__
+    return launch_agent(self._config, self._entrypoint, list(args))
+  File "/nfs/hpc/share/jainab/AI539/env/lib/python3.10/site-packages/torch/distributed/launcher/api.py", line 250, in launch_agent
+    raise ChildFailedError(
+torch.distributed.elastic.multiprocessing.errors.ChildFailedError: 
+============================================================
+train_rl_reft.py FAILED
+------------------------------------------------------------
+Failures:
+  <NO_OTHER_FAILURES>
+------------------------------------------------------------
+Root Cause (first observed failure):
+[0]:
+  time      : 2025-06-04_16:45:06
+  host      : dgx2-4.hpc.engr.oregonstate.edu
+  rank      : 0 (local_rank: 0)
+  exitcode  : 1 (pid: 1206795)
+  error_file: <N/A>
+  traceback : To enable traceback see: https://pytorch.org/docs/stable/elastic/errors.html
+============================================================
