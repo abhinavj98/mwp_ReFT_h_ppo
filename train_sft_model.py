@@ -32,7 +32,7 @@ import pandas as pd
 import shutil
 import copy
 tqdm = partial(tqdm, ncols=0, leave=False)
-
+import time
 TIMEOUT = 10
 instruction=None
 cot_trigger=None
@@ -100,7 +100,7 @@ def prepare_datasets_and_data_loaders(args, tokenizer):
         raw_dataset = DatasetDict({
             'train': corrupt_training_data(
                 DatasetDict({'train': Dataset.from_list(json.load(open(args['train_file'],'r')))}),
-                corruption_fraction=0.5, seed=args.get('seed', 42)
+                corruption_fraction=0.8, seed=args.get('seed', 42)
             ),
             'test': Dataset.from_list(json.load(open(args['test_file'],'r')))
         })
@@ -415,8 +415,12 @@ def evaluate_generation(args, model, dataset, dataloader, tokenizer):
 def main(args):
     set_seed(args['seed'] + accelerator.process_index)
     if torch.distributed.get_rank() == 0 and args['wandb_log']:
-        wandb.init(project=args['wandb_project'], name=args['wandb_run_name'])
+        random_str_ascii = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz0123456789', k=8))
+        name = args['wandb_run_name'] + random_str_ascii
+        wandb.init(project=args['wandb_project'], name=name, resume=False,
+            reinit=True)
         wandb.config.update(args)
+        print(f'WandB initialized with project: {args["wandb_project"]}, run_name: {args["wandb_run_name"]}')
         
     tokenizer = AutoTokenizer.from_pretrained(args['tokenizer_name_or_path'], use_fast=True)
     tokenizer.pad_token_id = 1

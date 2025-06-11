@@ -1,6 +1,6 @@
 #!/bin/bash
 
-exp_name="gsm8k_python_sdp_galactica_125m_05"
+exp_name="gsm8k_python_sdp_galactica_125m_08"
 config_file="./default_config_deepspeed.yaml"
 keep_num_ckpt='40'
 batch_size="4"

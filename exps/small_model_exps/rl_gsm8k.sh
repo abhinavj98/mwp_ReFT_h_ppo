@@ -13,9 +13,9 @@ ref_model_name_or_path="ppo_paper_final_new/_models_outputs_sft_small/gsm8k_pyth
 #"ppo_paper_final_new/_models_outputs_sft_small/gsm8k_python_sdp_galactica_125m/global_step_1540_epoch_10/"
 
 keep_num_ckpt='0'
-batch_size="32"
-mini_batch_size="32"
-eval_batch_size="32"
+batch_size="2"
+mini_batch_size="2"
+eval_batch_size="2"
 ppo_epochs="2"
 n_epochs="700"
 num_workers="0"

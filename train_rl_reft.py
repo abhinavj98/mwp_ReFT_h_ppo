@@ -287,6 +287,189 @@ def do_checkpoint(args, model, tokenizer, save_path, most_recent_ckpts_paths=Non
 import torch
 import torch.nn.functional as F
 
+def offline_rollout(
+    args,
+    model,
+    ref_model,
+    tokenizer,
+    offline_kwargs,    # dict with 'input_ids', 'attention_mask', 'labels'
+    answer_values,     # list of length B with ground-truth answers (strings or numbers)
+    src_name           # dataset prefix, e.g. 'gsm8k'
+):
+    """
+    Runs a “re-score” of the gold CoT under both the current policy (model) and expert policy (ref_model),
+    then computes Retrace/IS-GAE advantages and λ-returns for off-policy training.
+    """
+
+    # Unpack offline inputs
+    input_ids_off   = offline_kwargs['input_ids']        # [B, S]
+    attention_off   = offline_kwargs['attention_mask']   # [B, S]
+    labels_off      = offline_kwargs['labels']           # [B, S]
+    B, S            = input_ids_off.size()
+
+    # 1) Forward-pass through the current policy to get logits and values (with gradients)
+    outputs_off      = model(input_ids=input_ids_off, attention_mask=attention_off)
+    logits_off, _, values_off_tensor = outputs_off
+    # # Handle HF tuple vs. ModelOutput
+    # logits_off       = outputs_off.logits if hasattr(outputs_off, "logits") else outputs_off[0]  # [B, S, V]
+    # values_off_tensor = outputs_off.value  if hasattr(outputs_off, "value")  else outputs_off[1]  # [B, S]
+
+    # Compute log-softmax over vocabulary at each position
+    logprob_full = F.log_softmax(logits_off, dim=-1)   # [B, S, V]
+    logprob_next = logprob_full[:, :-1, :]             # [B, S-1, V]
+
+    # Build new_logprob_off[b, t] = log π_new(a_t | …) for t in 1..S-1, only where labels_off != -100
+    new_logprob_off = torch.zeros((B, S-1), device=input_ids_off.device)
+    for b in range(B):
+        nonpad_positions = (labels_off[b] != -100).nonzero(as_tuple=True)[0]
+        for pos in nonpad_positions:
+            t = pos.item()
+            if t == 0:
+                continue
+            token_id = labels_off[b, t].item()
+            new_logprob_off[b, t-1] = logprob_next[b, t-1, token_id]
+
+    # 2) Forward-pass through the expert policy under no_grad to get expert_logprob
+    with torch.no_grad():
+        ref_outputs_off    = ref_model(input_ids=input_ids_off, attention_mask=attention_off)
+        ref_logits_off     = ref_outputs_off.logits if hasattr(ref_outputs_off, "logits") else ref_outputs_off[0]  # [B, S, V]
+        ref_logprob_full   = F.log_softmax(ref_logits_off, dim=-1)  # [B, S, V]
+        ref_logprob_next   = ref_logprob_full[:, :-1, :]            # [B, S-1, V]
+
+    expert_logprob = torch.zeros((B, S-1), device=input_ids_off.device)
+    for b in range(B):
+        nonpad_positions = (labels_off[b] != -100).nonzero(as_tuple=True)[0]
+        for pos in nonpad_positions:
+            t = pos.item()
+            if t == 0:
+                continue
+            token_id = labels_off[b, t].item()
+            expert_logprob[b, t-1] = ref_logprob_next[b, t-1, token_id]
+
+    # 3) Build mask_off: True where labels_off != -100 (i.e. CoT/EOS), else False
+    mask_off = (labels_off != -100)  # [B, S]
+    mask_off_tokens = mask_off[:, 1:]  # [B, S-1]
+
+    # 4) Compute sparse correctness reward at the final CoT token
+    score_rew_off = np.zeros((B, S), dtype=np.float32)
+    decoded_texts = tokenizer.batch_decode(input_ids_off.cpu().tolist(), skip_special_tokens=False)
+    exec_fn = post_process_answer_cot_fn_mapper[(args['engine'], src_name)]
+
+    corr_off = []
+    for b in range(B):
+        # Extract the program text after cot_trigger
+        program = decoded_texts[b].strip().split(cot_trigger)[-1].strip()
+        extracted_ans = exec_fn([program])[0]
+        target_value = post_process_final_answer_fn_mapper[src_name](answer_values[b])
+
+        if extracted_ans is None:
+            corr = 0.0
+        else:
+            if args['engine'] in ("game24", "calcn"):
+                corr = float(extracted_ans)
+            else:
+                corr = 1.0 if compare_answer_fn_mapper[src_name](extracted_ans, target_value) else 0.0
+        corr_off.append(corr)
+
+        # Find first EOS index (or end)
+        eos_positions = (input_ids_off[b] == tokenizer.eos_token_id).nonzero(as_tuple=True)[0]
+        eos_index = eos_positions[0].item() if len(eos_positions) > 0 else (attention_off[b].sum().item() - 1)
+
+        pre_eos = eos_index - 1
+        if pre_eos >= 0:
+            score_rew_off[b, pre_eos] = corr_off[b]
+
+  
+    new_lp_np    = new_logprob_off.detach().cpu().numpy()   # [B, S-1]
+    expert_lp_np = expert_logprob.detach().cpu().numpy()             # [B, S-1]
+    full_rew_off = score_rew_off 
+
+    # 6) Run Retrace/IS-GAE to get advantages and returns
+    val_off_np  = values_off_tensor.detach().cpu().numpy()  # [B, S]
+    full_rew_np = full_rew_off                                  # [B, S]
+    mask_b_np   = mask_off.cpu().numpy()                        # [B, S]
+
+    advantages_off = np.zeros((B, S), dtype=np.float32)
+    returns_off    = np.zeros((B, S), dtype=np.float32)
+    gamma = args["gamma"]
+    lam   = args["lam"]
+
+    for b in range(B):
+        V_b = val_off_np[b]     # [S]
+        R_b = full_rew_np[b]    # [S]
+        M_b = mask_b_np[b]      # [S], bool
+
+        # Compute δ_t for t = 0..S-2
+        delta_b = np.zeros((S-1,), dtype=np.float32)
+        for t in range(S-1):
+            if not M_b[t]:
+                delta_b[t] = 0.0
+            else:
+                delta_b[t] = R_b[t] + gamma * V_b[t+1] - V_b[t]
+
+        # Importance weights c_t = min(1, exp(new_lp - expert_lp))
+        c_b = np.exp(new_lp_np[b] - expert_lp_np[b])  # [S-1]
+        c_b = np.maximum(c_b, 1.0)
+
+        # Backward recursion: A_t = c_t * (δ_t + γ λ A_{t+1})
+        A_b = np.zeros((S,), dtype=np.float32)
+        for t in reversed(range(S-1)):
+            if not M_b[t]:
+                A_b[t] = 0.0
+            else:
+                next_A = 0.0 if t == S-2 else A_b[t+1]
+                A_b[t] = c_b[t] * (delta_b[t] + gamma * lam * next_A)
+
+        advantages_off[b, :] = A_b
+        returns_off[b, :]     = A_b + V_b
+
+    # 7) Convert advantages and returns back to torch, mask out non-CoT tokens
+    adv_off_t = torch.tensor(advantages_off, device=input_ids_off.device) * mask_off
+    ret_off_t = torch.tensor(returns_off,    device=input_ids_off.device) * mask_off
+    val_off_t = values_off_tensor * mask_off
+    score_rew_t = torch.tensor(full_rew_off, device=input_ids_off.device) * mask_off
+
+    return {
+        "new_logprob_off":   new_logprob_off,    # [B, S-1], requires_grad
+        "expert_logprob":    expert_logprob,     # [B, S-1], no grad
+        "advantages_off":    adv_off_t,          # [B, S]
+        "returns_off":       ret_off_t,          # [B, S]
+        "values_off":        val_off_t,          # [B, S]
+        "mask_off":          mask_off,           # [B, S]
+        "score_rew_off":     score_rew_t         # [B, S]
+    }
+
+#Function that takes in sequence and returns log probs of gold CoT tokens
+def offline_forward(args, model, tokenizer, batch):
+    """
+    Computes log-probabilities of gold CoT tokens in the input sequence.
+    """
+    # Unpack batch
+    offline = batch['ppo_offline_forward_kwargs']
+    input_ids_off   = offline['input_ids']        # [B, S]
+    attention_off   = offline['attention_mask']   # [B, S]
+    labels_off      = offline['labels']           # [B, S]
+    B, S            = input_ids_off.size()
+    # 1) Forward-pass through the current policy to get logits and values (with gradients)
+    outputs_off      = model(input_ids=input_ids_off, attention_mask=attention_off)
+    logits_off, _, _ = outputs_off
+    # Compute log-softmax over vocabulary at each position
+    logprob_full = F.log_softmax(logits_off, dim=-1)   # [B, S, V]
+    logprob_next = logprob_full[:, :-1, :]             # [B, S-1, V]
+    # Build new_logprob_off[b, t] = log π_new(a_t | …) for t in 1..S-1, only where labels_off != -100
+    new_logprob_off = torch.zeros((B, S-1), device=input_ids_off.device)
+    for b in range(B):
+        nonpad_positions = (labels_off[b] != -100).nonzero(as_tuple=True)[0]
+        for pos in nonpad_positions:
+            t = pos.item()
+            if t == 0:
+                continue
+            token_id = labels_off[b, t].item()
+            new_logprob_off[b, t-1] = logprob_next[b, t-1, token_id]
+    return new_logprob_off
+
+
+
 def offline_debug_rollout(model, tokenizer, batch):
 
     model.eval()
@@ -483,8 +666,17 @@ def train_one_epoch(args, model, ref_model, train_dataset, train_dataloader, opt
                 answer_values=batch['ppo_forward_kwargs']['answer_values'],
                 src_name=train_dataset[0]['item_id'].split('_')[0],
             )
-            # Debug
-            offline_debug_rollout(model, tokenizer, batch)
+            # Offline rollout
+            offline_data = offline_rollout(
+                args,
+                model,
+                ref_model,
+                tokenizer,
+                offline_kwargs=batch['ppo_offline_forward_kwargs'],
+                answer_values=batch['ppo_forward_kwargs']['answer_values'],
+                src_name=train_dataset[0]['item_id'].split('_')[0],
+            )
+           
             model.train()
             # preprocess
             raw_adv = adv
@@ -545,8 +737,57 @@ def train_one_epoch(args, model, ref_model, train_dataset, train_dataloader, opt
                     vf_loss = 0.5 * ((torch.max(vf_losses1, vf_losses2) * cur_mask).sum(dim=-1) / resp_len_per_sample).mean()
                     # vf_loss = 0.5 * ((torch.max(vf_losses1, vf_losses2) * cur_mask).sum() / cur_mask.sum())
 
-                    # total loss
+                    # total online loss
                     loss += pg_loss + vf_coef * vf_loss
+        #   "new_logprob_off":   new_logprob_off,    # [B, S-1], requires_grad
+        # "expert_logprob":    expert_logprob,     # [B, S-1], no grad
+        # "advantages_off":    adv_off_t,          # [B, S]
+        # "returns_off":       ret_off_t,          # [B, S]
+        # "values_off":        val_off_t,          # [B, S]
+        # "mask_off":          mask_off,           # [B, S]
+        # "score_rew_off":     score_rew_t         # [B, S]
+                     # Extract the full‐batch offline tensors:
+                    # new_logprob_off    = offline_data["new_logprob_off"][b_inds]    # [mini_bs, S-1]
+                    expert_logprob     = offline_data["expert_logprob"][b_inds]     # [mini_bs, S-1]
+                    adv_off       = offline_data["advantages_off"][b_inds]            # [B, S]
+                    ret_off       = offline_data["returns_off"][b_inds]       # [mini_bs, S]
+                    val_off       = offline_data["values_off"][b_inds]        # [mini_bs, S]
+                    mask_off      = offline_data["mask_off"][b_inds]           # [mini_bs, S]
+                    score_rew_off = offline_data["score_rew_off"][b_inds]     # [mini_bs, S]
+
+                    input_ids_tensor_off  = batch[b_inds]['ppo_offline_forward_kwargs']['input_ids']       # [B, S]
+                    attention_tensor_off  = batch[b_inds]['ppo_offline_forward_kwargs']['attention_mask']  # [B, S]
+                    labels_tensor_off     = batch[b_inds]['ppo_offline_forward_kwargs']['labels']          # [B, S]
+
+
+                    lm_logits_off, _, vpreds = model(input_ids=input_ids_tensor_off, attention_mask=attention_tensor_off)
+                    logprob_off = logprobs_from_logits(lm_logits_off[:, :-1, :], labels_tensor_off[:, 1:])  # (mini_bs, seqlen-1)
+
+          
+
+                    # # Importance ratio: π_new / π_expert  at each CoT token
+                    ratio_off = torch.exp(logprob_off - expert_logprob)  # [mini_bs, S-1]
+                    # # PPO surrogate terms
+                    surr1_off = ratio_off * adv_off
+                    surr2_off = torch.clamp(ratio_off, 1 - args['clip_range'], 1 + args['clip_range']) * adv_off_trunc
+
+                    # # Only measure at valid CoT/EOS positions
+                    policy_loss_off = -torch.mean(torch.min(surr1_off, surr2_off))
+
+                    # # Value loss: MSE between V_new and offline λ-return at CoT positions
+                    # vpred_off_trunc = cur_val_off[:, :-1]                # [mini_bs, S-1]
+                    # ret_off_trunc   = cur_ret_off[:, :-1]                # [mini_bs, S-1]
+                    # # Mask out non‐CoT positions
+                    # vpreds_m = vpred_off_trunc[cur_mask_tokens_off]
+                    # rets_m   = ret_off_trunc[cur_mask_tokens_off]
+                    # value_loss_off = torch.nn.functional.mse_loss(vpreds_m, rets_m)
+
+                    # # Weight your offline term (e.g. args['offline_coef'])
+                    # offline_coef = args.get("offline_coef", 1.0)
+                    loss = loss + policy_loss_off
+
+
+
 
                     # model_output = model(input_ids=model_input_ids, attention_mask=model_attention_mask)
                     # logits = model_output[0]
