@@ -1,15 +1,15 @@
 #!/bin/bash
 export TOKENIZERS_PARALLELISM=True
-exp_name="gsm8k_python_sdp_galactica_125m_reft"
-model_dir="ppo_paper_final_new/_models_outputs_rl_small/gsm8k_python_sdp_galactica_125m_reft"
+exp_name="gsm8k_python_sdp_galactica_125m_reft_h_0.5"
+model_dir="ppo_paper_final_new/_models_outputs_rl_small/gsm8k_python_sdp_galactica_125m_reft_h_0.5"
 train_file="data/gsm8k_python_sdp.json"
 test_file="data/gsm8k_test_set.json"
 engine='python' # 'python' or 'nl'
 
-model_name_or_path="ppo_paper_final_new/_models_outputs_sft_small/gsm8k_python_sdp_galactica_125m/global_step_12260_epoch_10"
-tokenizer_name_or_path="ppo_paper_final_new/_models_outputs_sft_small/gsm8k_python_sdp_galactica_125m/global_step_12260_epoch_10"
+model_name_or_path="ppo_paper_final_new/_models_outputs_sft_small/gsm8k_python_sdp_galactica_125m_08/global_step_20229_epoch_11"
+tokenizer_name_or_path="ppo_paper_final_new/_models_outputs_sft_small/gsm8k_python_sdp_galactica_125m_08/global_step_20229_epoch_11"
 #"ppo_paper_final_new/_models_outputs_sft_small/gsm8k_python_sdp_galactica_125m/global_step_1540_epoch_10/"
-ref_model_name_or_path="ppo_paper_final_new/_models_outputs_sft_small/gsm8k_python_sdp_galactica_125m/global_step_12260_epoch_10"
+ref_model_name_or_path="ppo_paper_final_new/_models_outputs_sft_small/gsm8k_python_sdp_galactica_125m_08/global_step_20229_epoch_11"
 #"ppo_paper_final_new/_models_outputs_sft_small/gsm8k_python_sdp_galactica_125m/global_step_1540_epoch_10/"
 
 keep_num_ckpt='0'
@@ -42,14 +42,14 @@ wandb_project="ReFT_small"
 wandb_run_name="${exp_name}"
 
 num_processes='1'
-main_process_port='8885'
+main_process_port='8888'
 
 mkdir -p "${model_dir}"
 accelerate launch \
             --config_file ./default_config_deepspeed.yaml \
             --num_processes=${num_processes} \
             --main_process_port=${main_process_port} \
-    train_rl_reft.py \
+    train_rl_reft_hybrid.py \
             --model_name_or_path "${model_name_or_path}" \
             --tokenizer_name_or_path "${tokenizer_name_or_path}" \
             --ref_model_name_or_path "${ref_model_name_or_path}" \
@@ -85,6 +85,5 @@ accelerate launch \
             --engine "${engine}" \
             --adv_whitening "${adv_whitening}" \
             --keep_num_ckpt "${keep_num_ckpt}" \
-            
             1> >(tee "${model_dir}"/"${exp_name}".log) \
             2> >(tee "${model_dir}"/"${exp_name}".err >&2)

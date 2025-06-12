@@ -5,7 +5,7 @@ config_file="./default_config_deepspeed.yaml"
 keep_num_ckpt='40'
 batch_size="4"
 gradient_accumulation_steps="1"
-
+corruption_ratio="0.5"
 train_file="data/gsm8k_python_sdp.json"
 test_file="data/gsm8k_test_set.json"
 engine="python" # 'python' or 'nl'
@@ -65,5 +65,6 @@ accelerate launch \
             --wandb_project "${wandb_project}" \
             --wandb_run_name "${wandb_run_name}" \
             --engine "${engine}" \
+            --corruption_ratio "${corruption_ratio}"\
             1> >(tee "${model_dir}"/"${exp_name}".log) \
             2> >(tee "${model_dir}"/"${exp_name}".err >&2)

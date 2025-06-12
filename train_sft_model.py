@@ -31,8 +31,10 @@ import wandb
 import pandas as pd
 import shutil
 import copy
+from datasets import Dataset
+
 tqdm = partial(tqdm, ncols=0, leave=False)
-import time
+
 TIMEOUT = 10
 instruction=None
 cot_trigger=None
@@ -72,104 +74,177 @@ compare_answer_fn_mapper = {
     'mathqa-numeric': lambda extracted_ans, target_answer: abs(extracted_ans - target_answer) <= 1e-2,
 }
 
-def corrupt_training_data(raw_dataset, corruption_fraction=0.5, seed=42):
-    # Work on a copy
-    corrupted = copy.deepcopy(raw_dataset['train'])
+def corrupt_training_data(raw_dataset, corruption_ratio=1.0, seed=42):
+    
+    if corruption_ratio == 0.0:
+        return raw_dataset['train']
+
+    corrupted = copy.deepcopy(raw_dataset['train'].to_list()) 
     n = len(corrupted)
-    n_corrupt = int(n * corruption_fraction)
-    rng = random.Random(seed)  # Deterministic corruption for reproducibility
+    n_corrupt = int(n * corruption_ratio)
+    rng = random.Random(seed)
 
     indices = list(range(n))
     rng.shuffle(indices)
     corrupt_indices = indices[:n_corrupt]
-    other_indices = indices[n_corrupt:]
-    # For each selected index, assign a random (but not the same) answer_value/cot from the set
+
+    printed = 0
     for idx in corrupt_indices:
-        # Pick a random, different index
         possible = [i for i in indices if i != idx]
         replacement_idx = rng.choice(possible)
-        # Overwrite
-        corrupted[idx]['answer_value'] = raw_dataset['train'][replacement_idx]['answer_value']
-        if 'answer_cot' in corrupted[idx]:
-            corrupted[idx]['answer_cot'] = raw_dataset['train'][replacement_idx].get('answer_cot', None)
-    # Return a new Dataset object
+
+        question = corrupted[idx]['question']
+        original_answer = corrupted[idx]['answer_value']
+        original_cot = corrupted[idx].get('answer_cot', '[None]')
+        corrupted_answer = raw_dataset['train'][replacement_idx]['answer_value']
+        corrupted_cot = raw_dataset['train'][replacement_idx].get('answer_cot', '[None]')
+
+        
+        corrupted[idx] = {
+            **corrupted[idx],
+            "answer_value": corrupted_answer,
+            "answer_cot": corrupted_cot,
+        }
+
+        if printed < 2:
+            print(f"\n[Corruption Example {printed + 1}]", flush=True)
+            print(f"Question          : {question}", flush=True)
+            print(f"Original Answer   : {original_answer}", flush=True)
+            print(f"Original CoT      : {original_cot}", flush=True)
+            print(f"Corrupted Answer  : {corrupted_answer}", flush=True)
+            print(f"Corrupted CoT     : {corrupted_cot}", flush=True)
+            printed += 1
+
     return Dataset.from_list(corrupted)
+
+# def corrupt_training_data(raw_dataset, corruption_ratio=1.0, seed=42):
+#     corrupted = copy.deepcopy(raw_dataset['train']).to_list()
+#     n = len(corrupted)
+#     n_corrupt = int(n * corruption_ratio)
+#     rng = random.Random(seed)
+
+#     indices = list(range(n))
+#     rng.shuffle(indices)
+#     corrupt_indices = indices[:n_corrupt]
+
+#     printed = 0
+#     for idx in corrupt_indices:
+#         example = corrupted[idx]
+#         question = example['question']
+#         original_answer = example['answer_value']
+#         original_cot = example.get('answer_cot', '[None]')
+
+#         # Apply structured corruption to answer_value (numeric perturbation)
+#         try:
+#             answer_float = float(original_answer.replace(",", ""))
+#             corrupted_answer = str(round(answer_float + rng.uniform(-5, 5), 2))
+#         except:
+#             corrupted_answer = "42"  # fallback for non-numeric answers
+
+#         # Apply structured noise to answer_cot
+#         corrupted_cot = original_cot
+#         if corrupted_cot and isinstance(corrupted_cot, str):
+#             lines = corrupted_cot.strip().split('\n')
+#             for i, line in enumerate(lines):
+#                 if 'result' in line:
+#                     lines[i] = line.replace('result', 'res_')  # rename variable
+#             if len(lines) > 2:
+#                 insert_line = "    noise_var = 123  # noise"
+#                 lines.insert(rng.randint(1, len(lines) - 1), insert_line)
+#             corrupted_cot = '\n'.join(lines)
+
+#         # ✅ Overwrite the record fully to ensure it is updated
+#         corrupted[idx] = {
+#             **example,
+#             "answer_value": corrupted_answer,
+#             "answer_cot": corrupted_cot,
+#         }
+
+#         # Print a few examples for inspection
+#         if printed < 2:
+#             print(f"\n[Corruption Example {printed + 1}]", flush=True)
+#             print(f"Question          : {question}", flush=True)
+#             print(f"Original Answer   : {original_answer}", flush=True)
+#             print(f"Original CoT      : {original_cot}", flush=True)
+#             print(f"Corrupted Answer  : {corrupted_answer}", flush=True)
+#             print(f"Corrupted CoT     : {corrupted_cot}", flush=True)
+#             printed += 1
+
+#     return Dataset.from_list(corrupted)
+
+
+def tokenize_fn(batch, args, tokenizer):
+    assert tokenizer.eos_token_id is not None, (tokenizer.eos_token_id, tokenizer.eos_token)
+    new_batch = defaultdict(list)
+    all_keys = list(batch.keys())
+    for item_values in zip(*(batch[k] for k in all_keys)):
+        item = {k: item_values[i] for i, k in enumerate(all_keys)}
+        item_id, question, answer_value, answer_cot = \
+                item['item_id'], \
+                item['question'], \
+                item['answer_value'], \
+                item.get('answer_cot', None), \
+
+        question = question.strip()
+        if answer_value is not None:
+            answer_value = answer_value.strip()
+
+        if answer_cot is not None:
+            answer_cot = answer_cot.strip()
+            if args['engine'] == 'nl':
+                answer_cot += f'{answer_trigger}{answer_value}'
+
+        input = f'{instruction}{question}{cot_trigger}'
+        output = f'{answer_cot}'
+        prefix_text = f'{instruction}{question}{cot_trigger}'
+
+        input_encode = tokenizer(input, add_special_tokens=False)
+        output_encode = tokenizer(output, add_special_tokens=False)
+        prefix_encode = tokenizer(prefix_text, add_special_tokens=False)
+
+        input_ids = input_encode['input_ids'] + output_encode['input_ids'] + [tokenizer.eos_token_id]
+        labels = [-100]*len(input_encode['input_ids']) + output_encode['input_ids'] + [tokenizer.eos_token_id]
+        attention_mask = [1]* len(input_ids)
+        prefix = prefix_encode['input_ids']
+        prefix_attention_mask = prefix_encode['attention_mask']
+
+        # Truncation
+        input_ids_max_length = len(input_ids)
+        # assert input_ids_max_length <= args['max_input_length'], input_ids_max_length
+        input_ids = input_ids[:args['max_input_length']]
+        labels = labels[:args['max_input_length']]
+        attention_mask = attention_mask[:args['max_input_length']]
+        prefix = prefix[:args['max_input_length']]
+        prefix_attention_mask = prefix_attention_mask[:args['max_input_length']]
+
+        ##
+        new_batch['input_ids'].append(input_ids)
+        new_batch['labels'].append(labels)
+        new_batch['attention_mask'].append(attention_mask)
+        new_batch['prefix'].append(prefix)
+        new_batch['prefix_attention_mask'].append(prefix_attention_mask)
+        ##
+        new_batch['item_id'].append(item_id)
+        new_batch['question'].append(question)
+        new_batch['answer_cot'].append(answer_cot)
+        new_batch['answer_value'].append(answer_value)
+        new_batch['input_ids_max_length'].append(input_ids_max_length)
+    
+    return new_batch
 
 def prepare_datasets_and_data_loaders(args, tokenizer):
     with accelerator.main_process_first():
         raw_dataset = DatasetDict({
-            'train': corrupt_training_data(
-                DatasetDict({'train': Dataset.from_list(json.load(open(args['train_file'],'r')))}),
-                corruption_fraction=0.8, seed=args.get('seed', 42)
-            ),
-            'test': Dataset.from_list(json.load(open(args['test_file'],'r')))
+            'train': Dataset.from_list(json.load(open(args['train_file'],'r'))),
+            'test': Dataset.from_list(json.load(open(args['test_file'],'r'))),
         })
-
         accelerator.print('Raw data:', raw_dataset)
         src_name = raw_dataset['train'][0]['item_id'].split('_')[0]  # e.g., gsm8k_0, gsm8k_1, gsm8k_2, ...
         setup_cot(src_name)
         accelerator.print('Using instruction:', instruction)
         accelerator.print('Using cot_trigger:', cot_trigger)
         accelerator.print('Using answer_trigger:', answer_trigger)
-        def tokenize_fn(batch, args, tokenizer):
-            assert tokenizer.eos_token_id is not None, (tokenizer.eos_token_id, tokenizer.eos_token)
-            new_batch = defaultdict(list)
-            all_keys = list(batch.keys())
-            for item_values in zip(*(batch[k] for k in all_keys)):
-                item = {k: item_values[i] for i, k in enumerate(all_keys)}
-                item_id, question, answer_value, answer_cot = \
-                        item['item_id'], \
-                        item['question'], \
-                        item['answer_value'], \
-                        item.get('answer_cot', None), \
-
-                question = question.strip()
-                if answer_value is not None:
-                    answer_value = answer_value.strip()
-
-                if answer_cot is not None:
-                    answer_cot = answer_cot.strip()
-                    if args['engine'] == 'nl':
-                        answer_cot += f'{answer_trigger}{answer_value}'
-
-                input = f'{instruction}{question}{cot_trigger}'
-                output = f'{answer_cot}'
-                prefix_text = f'{instruction}{question}{cot_trigger}'
-
-                input_encode = tokenizer(input, add_special_tokens=False)
-                output_encode = tokenizer(output, add_special_tokens=False)
-                prefix_encode = tokenizer(prefix_text, add_special_tokens=False)
-
-                input_ids = input_encode['input_ids'] + output_encode['input_ids'] + [tokenizer.eos_token_id]
-                labels = [-100]*len(input_encode['input_ids']) + output_encode['input_ids'] + [tokenizer.eos_token_id]
-                attention_mask = [1]* len(input_ids)
-                prefix = prefix_encode['input_ids']
-                prefix_attention_mask = prefix_encode['attention_mask']
-
-                # Truncation
-                input_ids_max_length = len(input_ids)
-                # assert input_ids_max_length <= args['max_input_length'], input_ids_max_length
-                input_ids = input_ids[:args['max_input_length']]
-                labels = labels[:args['max_input_length']]
-                attention_mask = attention_mask[:args['max_input_length']]
-                prefix = prefix[:args['max_input_length']]
-                prefix_attention_mask = prefix_attention_mask[:args['max_input_length']]
-
-                ##
-                new_batch['input_ids'].append(input_ids)
-                new_batch['labels'].append(labels)
-                new_batch['attention_mask'].append(attention_mask)
-                new_batch['prefix'].append(prefix)
-                new_batch['prefix_attention_mask'].append(prefix_attention_mask)
-                ##
-                new_batch['item_id'].append(item_id)
-                new_batch['question'].append(question)
-                new_batch['answer_cot'].append(answer_cot)
-                new_batch['answer_value'].append(answer_value)
-                new_batch['input_ids_max_length'].append(input_ids_max_length)
-            
-            return new_batch
-
+ 
         tokenized_dataset = DatasetDict({
             mode: dataset.map(
                 tokenize_fn, fn_kwargs={'args': args, 'tokenizer': tokenizer}, batched=True, remove_columns=dataset.column_names, 
@@ -225,8 +300,6 @@ def prepare_datasets_and_data_loaders(args, tokenizer):
 
     train_dataloader = DataLoader(tokenized_dataset['train'], shuffle=True, batch_size=args['batch_size'], num_workers=args['num_workers'], pin_memory=True, 
                         collate_fn=partial(collate_fn, args=args, tokenizer=tokenizer))
-    
-    
                         
     test_dataloader = DataLoader(tokenized_dataset['test'], shuffle=False, batch_size=args['eval_batch_size'], num_workers=args['num_workers'], pin_memory=True, 
                         collate_fn=partial(collate_fn, args=args, tokenizer=tokenizer))
@@ -415,18 +488,75 @@ def evaluate_generation(args, model, dataset, dataloader, tokenizer):
 def main(args):
     set_seed(args['seed'] + accelerator.process_index)
     if torch.distributed.get_rank() == 0 and args['wandb_log']:
-        random_str_ascii = ''.join(random.choices('abcdefghijklmnopqrstuvwxyz0123456789', k=8))
-        name = args['wandb_run_name'] + random_str_ascii
-        wandb.init(project=args['wandb_project'], name=name, resume=False,
-            reinit=True)
+        corruption_ratio = args.get('corruption_ratio', 0.0)
+        unique_run_name = f"{args['wandb_run_name']}_corr{corruption_ratio}"
+        wandb.init(project=args['wandb_project'], name=unique_run_name, resume=False)
         wandb.config.update(args)
-        print(f'WandB initialized with project: {args["wandb_project"]}, run_name: {args["wandb_run_name"]}')
+        wandb.log({'corruption_ratio': corruption_ratio}, step=0)
         
     tokenizer = AutoTokenizer.from_pretrained(args['tokenizer_name_or_path'], use_fast=True)
     tokenizer.pad_token_id = 1
     tokenizer.eos_token_id = 2
 
-    (train_dataset, train_dataloader), (test_dataset, test_dataloader) = prepare_datasets_and_data_loaders(args, tokenizer)
+    raw_dataset = DatasetDict({
+        'train': Dataset.from_list(json.load(open(args['train_file'],'r'))),
+        'test': Dataset.from_list(json.load(open(args['test_file'],'r')))
+    })
+    
+    src_name = raw_dataset['train'][0]['item_id'].split('_')[0]
+    setup_cot(src_name)
+
+    corruption_ratio = args.get('corruption_ratio', 0.0) 
+    corrupted_train_dataset = corrupt_training_data(raw_dataset, corruption_ratio)
+    
+    # Tokenize corrupted dataset
+    with accelerator.main_process_first():
+        tokenized_train_dataset = corrupted_train_dataset.map(
+            partial(tokenize_fn, args=args, tokenizer=tokenizer),
+            batched=True,
+            num_proc=1,
+            remove_columns=corrupted_train_dataset.column_names,
+            load_from_cache_file=False)
+        
+        for i in range(2):
+            input_text = tokenizer.decode(tokenized_train_dataset[i]['input_ids'])
+            label_text = tokenizer.decode(
+                [t if t != -100 else tokenizer.pad_token_id for t in tokenized_train_dataset[i]['labels']]
+            )
+            print(f"\n[DEBUG Example {i}]", flush=True)
+            print("Input text:\n", input_text, flush=True)
+            print("Target label text:\n", label_text, flush=True)
+        
+        tokenized_test_dataset = raw_dataset['test'].map(
+            partial(tokenize_fn, args=args, tokenizer=tokenizer),
+            batched=True,
+            num_proc=1,
+            remove_columns=raw_dataset['test'].column_names,
+            load_from_cache_file=False)
+
+    _, (_, dummy_test_dataloader) = prepare_datasets_and_data_loaders(args, tokenizer)
+
+    train_dataloader = DataLoader(
+    tokenized_train_dataset,
+    shuffle=True,
+    batch_size=args['batch_size'],
+    num_workers=args['num_workers'],
+    pin_memory=True,
+    collate_fn=dummy_test_dataloader.collate_fn)
+    
+
+    test_dataloader = DataLoader(
+        tokenized_test_dataset,
+        shuffle=False,
+        batch_size=args['eval_batch_size'],
+        num_workers=args['num_workers'],
+        pin_memory=True,
+        collate_fn=dummy_test_dataloader.collate_fn
+    )
+    test_dataset = tokenized_test_dataset
+
+    train_dataset = tokenized_train_dataset
+
     model = AutoModelForCausalLM.from_pretrained(args['model_name_or_path'], low_cpu_mem_usage=True, torch_dtype=torch.bfloat16)
     accelerator.print(f'[Vocab size]: {len(tokenizer)}')    
     model.resize_token_embeddings(len(tokenizer))
@@ -565,6 +695,8 @@ if __name__ == '__main__':
         wandb_run_name: str = field(default='default_run_name')
         ###
         engine: str = field(default='python')
+        corruption_ratio: float = field(default=0.0)  # 0.0 = no corruption, 1.0 = full corruption
+
 
     parser = HfArgumentParser(Arguments)
     (args,) = parser.parse_args_into_dataclasses()

@@ -219,7 +219,13 @@ def prepare_datasets_and_data_loaders(args, tokenizer):
             # input_ids.append(item['input_ids'] + [tokenizer.pad_token_id] * (max_input_length - len(item['input_ids'])))
             # attention_mask.append(item['attention_mask'] + [0] * (max_input_length - len(item['attention_mask'])))
             # labels.append(item['labels'] + [-100] * (max_target_length - len(item['labels'])))
-
+            pad_len_input = max_input_length - len(item['input_ids'])
+            input_ids_left_padded.append(
+                [tokenizer.pad_token_id] * pad_len_input + item['input_ids']
+            )
+            attention_mask_left_padded.append(
+                [0] * pad_len_input + item['attention_mask']
+            )
             labels_left_padded.append([-100] * (max_target_length - len(item['labels'])) + item['labels'])
             prefix_left_padded.append([tokenizer.pad_token_id] * (max_prefix_length - len(item['prefix'])) + item['prefix'])
             prefix_attention_mask_left_padded.append(
@@ -243,9 +249,16 @@ def prepare_datasets_and_data_loaders(args, tokenizer):
             'labels': torch.LongTensor(labels_left_padded)
         }
 
+        ppo_offline_forward_kwargs = {
+            'input_ids': torch.LongTensor(input_ids_left_padded),         
+            'attention_mask': torch.BoolTensor(attention_mask_left_padded),
+            'labels': torch.LongTensor(labels_left_padded),                 
+            }
+
         return {
             'ppo_forward_kwargs': ppo_forward_kwargs,
             'generate_prefix_kwargs': generate_prefix_kwargs,
+            'ppo_offline_forward_kwargs': ppo_offline_forward_kwargs,
         }
 
     train_dataloader = DataLoader(tokenized_dataset['train'], shuffle=True, batch_size=args['batch_size'],
@@ -270,6 +283,407 @@ def do_checkpoint(args, model, tokenizer, save_path, most_recent_ckpts_paths=Non
             ckpt_to_be_removed = most_recent_ckpts_paths.pop(0)
             # os.remove(ckpt_to_be_removed)
             shutil.rmtree(ckpt_to_be_removed)
+
+import torch
+import torch.nn.functional as F
+
+# def offline_rollout(
+#     args,
+#     model,
+#     ref_model,
+#     tokenizer,
+#     offline_kwargs,    # dict with 'input_ids', 'attention_mask', 'labels'
+#     answer_values,     # list of length B with ground-truth answers (strings or numbers)
+#     src_name           # dataset prefix, e.g. 'gsm8k'
+# ):
+#     """
+#     Runs a “re-score” of the gold CoT under both the current policy (model) and expert policy (ref_model),
+#     then computes Retrace/IS-GAE advantages and λ-returns for off-policy training.
+#     """
+
+#     # Unpack offline inputs
+#     input_ids_off   = offline_kwargs['input_ids']        # [B, S]
+#     attention_off   = offline_kwargs['attention_mask']   # [B, S]
+#     labels_off      = offline_kwargs['labels']           # [B, S]
+#     B, S            = input_ids_off.size()
+
+#     # 1) Forward-pass through the current policy to get logits and values (with gradients)
+#     outputs_off      = model(input_ids=input_ids_off, attention_mask=attention_off)
+#     logits_off, _, values_off_tensor = outputs_off
+#     # # Handle HF tuple vs. ModelOutput
+#     # logits_off       = outputs_off.logits if hasattr(outputs_off, "logits") else outputs_off[0]  # [B, S, V]
+#     # values_off_tensor = outputs_off.value  if hasattr(outputs_off, "value")  else outputs_off[1]  # [B, S]
+
+#     # Compute log-softmax over vocabulary at each position
+#     logprob_full = F.log_softmax(logits_off, dim=-1)   # [B, S, V]
+#     logprob_next = logprob_full[:, :-1, :]             # [B, S-1, V]
+
+#     # Build new_logprob_off[b, t] = log π_new(a_t | …) for t in 1..S-1, only where labels_off != -100
+#     new_logprob_off = torch.zeros((B, S-1), device=input_ids_off.device)
+#     for b in range(B):
+#         nonpad_positions = (labels_off[b] != -100).nonzero(as_tuple=True)[0]
+#         for pos in nonpad_positions:
+#             t = pos.item()
+#             if t == 0:
+#                 continue
+#             token_id = labels_off[b, t].item()
+#             new_logprob_off[b, t-1] = logprob_next[b, t-1, token_id]
+
+#     # 2) Forward-pass through the expert policy under no_grad to get expert_logprob
+#     with torch.no_grad():
+#         ref_outputs_off    = ref_model(input_ids=input_ids_off, attention_mask=attention_off)
+#         ref_logits_off     = ref_outputs_off.logits if hasattr(ref_outputs_off, "logits") else ref_outputs_off[0]  # [B, S, V]
+#         ref_logprob_full   = F.log_softmax(ref_logits_off, dim=-1)  # [B, S, V]
+#         ref_logprob_next   = ref_logprob_full[:, :-1, :]            # [B, S-1, V]
+
+#     expert_logprob = torch.zeros((B, S-1), device=input_ids_off.device)
+#     for b in range(B):
+#         nonpad_positions = (labels_off[b] != -100).nonzero(as_tuple=True)[0]
+#         for pos in nonpad_positions:
+#             t = pos.item()
+#             if t == 0:
+#                 continue
+#             token_id = labels_off[b, t].item()
+#             expert_logprob[b, t-1] = ref_logprob_next[b, t-1, token_id]
+
+#     # 3) Build mask_off: True where labels_off != -100 (i.e. CoT/EOS), else False
+#     mask_off = (labels_off != -100)  # [B, S]
+#     mask_off_tokens = mask_off[:, 1:]  # [B, S-1]
+
+#     # 4) Compute sparse correctness reward at the final CoT token
+#     score_rew_off = np.zeros((B, S), dtype=np.float32)
+#     decoded_texts = tokenizer.batch_decode(input_ids_off.cpu().tolist(), skip_special_tokens=False)
+#     exec_fn = post_process_answer_cot_fn_mapper[(args['engine'], src_name)]
+
+#     corr_off = []
+#     for b in range(B):
+#         # Extract the program text after cot_trigger
+#         program = decoded_texts[b].strip().split(cot_trigger)[-1].strip()
+#         extracted_ans = exec_fn([program])[0]
+#         target_value = post_process_final_answer_fn_mapper[src_name](answer_values[b])
+
+#         if extracted_ans is None:
+#             corr = 0.0
+#         else:
+#             if args['engine'] in ("game24", "calcn"):
+#                 corr = float(extracted_ans)
+#             else:
+#                 corr = 1.0 if compare_answer_fn_mapper[src_name](extracted_ans, target_value) else 0.0
+#         corr_off.append(corr)
+
+#         # Find first EOS index (or end)
+#         eos_positions = (input_ids_off[b] == tokenizer.eos_token_id).nonzero(as_tuple=True)[0]
+#         eos_index = eos_positions[0].item() if len(eos_positions) > 0 else (attention_off[b].sum().item() - 1)
+
+#         pre_eos = eos_index - 1
+#         if pre_eos >= 0:
+#             score_rew_off[b, pre_eos] = corr_off[b]
+
+  
+#     new_lp_np    = new_logprob_off.detach().cpu().numpy()   # [B, S-1]
+#     expert_lp_np = expert_logprob.detach().cpu().numpy()             # [B, S-1]
+#     full_rew_off = score_rew_off 
+
+#     # 6) Run Retrace/IS-GAE to get advantages and returns
+#     val_off_np  = values_off_tensor.detach().cpu().numpy()  # [B, S]
+#     full_rew_np = full_rew_off                                  # [B, S]
+#     mask_b_np   = mask_off.cpu().numpy()                        # [B, S]
+
+#     advantages_off = np.zeros((B, S), dtype=np.float32)
+#     returns_off    = np.zeros((B, S), dtype=np.float32)
+#     gamma = args["gamma"]
+#     lam   = args["lam"]
+
+#     for b in range(B):
+#         V_b = val_off_np[b]     # [S]
+#         R_b = full_rew_np[b]    # [S]
+#         M_b = mask_b_np[b]      # [S], bool
+
+#         # Compute δ_t for t = 0..S-2
+#         delta_b = np.zeros((S-1,), dtype=np.float32)
+#         for t in range(S-1):
+#             if not M_b[t]:
+#                 delta_b[t] = 0.0
+#             else:
+#                 delta_b[t] = R_b[t] + gamma * V_b[t+1] - V_b[t]
+
+#         # Importance weights c_t = min(1, exp(new_lp - expert_lp))
+#         c_b = np.exp(new_lp_np[b] - expert_lp_np[b])  # [S-1]
+#         c_b = np.maximum(c_b, 1.0)
+
+#         # Backward recursion: A_t = c_t * (δ_t + γ λ A_{t+1})
+#         A_b = np.zeros((S,), dtype=np.float32)
+#         for t in reversed(range(S-1)):
+#             if not M_b[t]:
+#                 A_b[t] = 0.0
+#             else:
+#                 next_A = 0.0 if t == S-2 else A_b[t+1]
+#                 A_b[t] = c_b[t] * (delta_b[t] + gamma * lam * next_A)
+
+#         advantages_off[b, :] = A_b
+#         returns_off[b, :]     = A_b + V_b
+
+#     # 7) Convert advantages and returns back to torch, mask out non-CoT tokens
+#     adv_off_t = torch.tensor(advantages_off, device=input_ids_off.device) * mask_off
+#     ret_off_t = torch.tensor(returns_off,    device=input_ids_off.device) * mask_off
+#     val_off_t = values_off_tensor * mask_off
+#     score_rew_t = torch.tensor(full_rew_off, device=input_ids_off.device) * mask_off
+
+#     return {
+#         "new_logprob_off":   new_logprob_off,    # [B, S-1], requires_grad
+#         "expert_logprob":    expert_logprob,     # [B, S-1], no grad
+#         "advantages_off":    adv_off_t,          # [B, S]
+#         "returns_off":       ret_off_t,          # [B, S]
+#         "values_off":        val_off_t,          # [B, S]
+#         "mask_off":          mask_off,           # [B, S]
+#         "score_rew_off":     score_rew_t         # [B, S]
+#     }
+
+
+def offline_rollout(
+    args,
+    model,
+    ref_model,
+    tokenizer,
+    offline_kwargs,    # dict with 'input_ids', 'attention_mask', 'labels'
+    answer_values,     # list of length B with ground-truth answers
+    src_name           # dataset prefix, e.g. 'gsm8k'
+):
+    """
+    Offline rollout: re-score existing CoT sequences under current and reference policies,
+    then compute IS-GAE advantages for off-policy training.
+    """
+    
+    # Unpack offline inputs
+    model_input_ids = offline_kwargs['input_ids']        # [B, S]
+    model_attention_mask = offline_kwargs['attention_mask']   # [B, S]
+    labels = offline_kwargs['labels']                    # [B, S]
+    
+    model.eval()
+    with torch.no_grad():
+        # Get current policy logprob and values
+        lm_logits, _dummy2, val = model(input_ids=model_input_ids, attention_mask=model_attention_mask)
+        old_logprob = logprobs_from_logits(lm_logits[:, :-1, :], labels=model_input_ids[:, 1:])  # (bs, seqlen-1)
+        
+        # Get reference model logprob
+        ref_logprob = None
+        if ref_model is not None:
+            ref_lm_logits, _dummy2, _dummy3 = ref_model(input_ids=model_input_ids, attention_mask=model_attention_mask)
+            ref_logprob = logprobs_from_logits(ref_lm_logits[:, :-1, :], labels=model_input_ids[:, 1:])  # (bs, seqlen-1)
+    
+    # Create mask: True for CoT tokens (where labels != -100)
+    mask = (labels != -100)  # (bs, seqlen)
+    
+    # Evaluate correctness rewards
+    completed_texts = tokenizer.batch_decode(model_input_ids.cpu().numpy().tolist(), skip_special_tokens=False)
+    programs = [text.strip().split(cot_trigger)[-1].strip() for text in completed_texts]
+    execute_fn = post_process_answer_cot_fn_mapper[(args['engine'], src_name)]
+    
+    correctness = []
+    for i, extracted_ans in enumerate(execute_fn(programs)):
+        target_value = post_process_final_answer_fn_mapper[src_name](answer_values[i])
+        if extracted_ans is not None:
+            if args['engine'] == 'game24' or args['engine'] == 'calcn':
+                is_correct = extracted_ans
+            else:
+                if compare_answer_fn_mapper[src_name](extracted_ans, target_value):
+                    is_correct = 1
+                else:
+                    is_correct = 0.1
+        else:
+            is_correct = 0
+        correctness.append(is_correct)
+    
+    # Place rewards at token before EOS (following online rollout pattern)
+    score_rew = np.zeros(mask.shape)  # (bs, seqlen)
+    nonzero = (model_input_ids == tokenizer.eos_token_id).nonzero()
+    for (bidx, tidx) in nonzero:
+        # Mask out tokens after EOS
+        mask[bidx][tidx:] = 0
+        score_rew[bidx][tidx:] = 0
+        # Place reward at token before EOS
+        if tidx > 0:
+            score_rew[bidx][tidx - 1] = correctness[bidx]
+    
+    # If no EOS found, place reward at last valid token
+    for bidx in range(model_input_ids.size(0)):
+        if (model_input_ids[bidx] == tokenizer.eos_token_id).sum() == 0:
+            last_valid = model_attention_mask[bidx].sum().item() - 1
+            if last_valid >= 0:
+                score_rew[bidx][last_valid] = correctness[bidx]
+    
+
+    rew = score_rew
+    
+    # Compute IS weights for GAE (π_new / π_expert)
+    is_weights = np.ones_like(old_logprob.cpu().numpy())  # (bs, seqlen-1)
+    if ref_logprob is not None:
+        log_is_weights = (old_logprob - ref_logprob).cpu().numpy()  # log(π_new/π_ref)
+        is_weights = np.exp(log_is_weights)
+        # Optional: clip IS weights to prevent explosion
+        is_weights = np.clip(is_weights, 0.001, 1.0)  # Clip to [0, 10] range
+    
+    # Compute GAE advantages with IS weighting
+    val = (val.float() * mask).cpu().numpy()
+    gamma = args["gamma"]
+    lam = args["lam"]
+    adv = np.zeros_like(rew)
+
+
+    for i in range(len(rew)):
+        cur_rew, cur_val = rew[i], val[i]
+        cur_is_weights = is_weights[i]  # (seqlen-1,)
+        
+        # Find the valid sequence length for this batch item
+        valid_length = int(mask[i].sum().item())
+        
+        # Retrace-style GAE computation (backward pass)
+        last_gae_lam = 0.0
+        
+        for step in reversed(range(valid_length)):
+            if step == valid_length - 1:
+                # Last step: no next value to bootstrap from
+                next_non_terminal = 0.0
+                next_value = 0.0
+            else:
+                # Not last step: bootstrap from next value
+                next_non_terminal = 1.0
+                next_value = cur_val[step + 1]
+            
+            # Compute TD error
+            delta = cur_rew[step] + gamma * next_value * next_non_terminal - cur_val[step]
+            
+            # Apply IS weight to TD error
+            if step < len(cur_is_weights):  # Handle dimension mismatch
+                ratio = cur_is_weights[step]
+                weighted_delta = delta * ratio
+            else:
+                weighted_delta = delta
+            
+            # Retrace-style GAE update
+            if step == valid_length - 1:
+                # Last step: no future GAE to bootstrap
+                last_gae_lam = weighted_delta
+            else:
+                # Apply IS weight to future GAE term as well
+                if step < len(cur_is_weights):
+                    last_gae_lam = weighted_delta + gamma * lam * next_non_terminal * last_gae_lam * ratio
+                else:
+                    last_gae_lam = weighted_delta + gamma * lam * next_non_terminal * last_gae_lam
+            
+            adv[i][step] = last_gae_lam
+    
+    # for i in range(len(rew)):
+    #     cur_rew, cur_val = rew[i], val[i]
+    #     cur_is_weights = is_weights[i]  # (seqlen-1,)
+        
+    #     # Compute TD errors
+    #     cur_delta = -cur_val[:-1] + cur_rew[:-1] + gamma * cur_val[1:]
+        
+    #     # Apply IS weighting to TD errors for GAE
+    #     weighted_deltas = cur_delta * cur_is_weights
+        
+    #     # Compute GAE with IS-weighted deltas
+    #     cur_adv = discount_cumsum(weighted_deltas, discount=gamma * lam)
+    #     adv[i][:-1] = cur_adv
+    
+    # Lambda returns = GAE + values
+    ret = adv + val  # (bs, seqlen)
+    
+    # Convert everything back to tensors and apply masking
+    rew = torch.tensor(rew, device=mask.device, dtype=old_logprob.dtype) * mask
+    score_rew = torch.tensor(score_rew, device=mask.device, dtype=old_logprob.dtype) * mask
+    ret = torch.tensor(ret, device=mask.device, dtype=old_logprob.dtype) * mask
+    val = torch.tensor(val, device=mask.device, dtype=old_logprob.dtype) * mask
+    adv = torch.tensor(adv, device=mask.device, dtype=old_logprob.dtype) * mask
+    old_logprob = old_logprob * mask[:, :-1]
+    
+    model.train()
+    return model_input_ids, model_attention_mask, mask, rew, score_rew, ret, correctness, val, old_logprob, ref_logprob, adv
+
+#Function that takes in sequence and returns log probs of gold CoT tokens
+def offline_forward(args, model, tokenizer, batch):
+    """
+    Computes log-probabilities of gold CoT tokens in the input sequence.
+    """
+    # Unpack batch
+    offline = batch['ppo_offline_forward_kwargs']
+    input_ids_off   = offline['input_ids']        # [B, S]
+    attention_off   = offline['attention_mask']   # [B, S]
+    labels_off      = offline['labels']           # [B, S]
+    B, S            = input_ids_off.size()
+    # 1) Forward-pass through the current policy to get logits and values (with gradients)
+    outputs_off      = model(input_ids=input_ids_off, attention_mask=attention_off)
+    logits_off, _, _ = outputs_off
+    # Compute log-softmax over vocabulary at each position
+    logprob_full = F.log_softmax(logits_off, dim=-1)   # [B, S, V]
+    logprob_next = logprob_full[:, :-1, :]             # [B, S-1, V]
+    # Build new_logprob_off[b, t] = log π_new(a_t | …) for t in 1..S-1, only where labels_off != -100
+    new_logprob_off = torch.zeros((B, S-1), device=input_ids_off.device)
+    for b in range(B):
+        nonpad_positions = (labels_off[b] != -100).nonzero(as_tuple=True)[0]
+        for pos in nonpad_positions:
+            t = pos.item()
+            if t == 0:
+                continue
+            token_id = labels_off[b, t].item()
+            new_logprob_off[b, t-1] = logprob_next[b, t-1, token_id]
+    return new_logprob_off
+
+
+
+def offline_debug_rollout(model, tokenizer, batch):
+
+    model.eval()
+    offline = batch['ppo_offline_forward_kwargs']
+    input_ids_tensor  = offline['input_ids']       # [B, S]
+    attention_tensor  = offline['attention_mask']  # [B, S]
+    labels_tensor     = offline['labels']          # [B, S]
+
+    prompt_texts      = batch['ppo_forward_kwargs']['query']        # list of B strings
+    answer_values     = batch['ppo_forward_kwargs']['answer_values']# list of B answers
+
+    B, S = input_ids_tensor.size()
+
+    with torch.no_grad():
+        # Forward pass: get logits over the vocabulary for every position
+        lm_logits, _, _ = model(input_ids=input_ids_tensor, attention_mask=attention_tensor)
+        logits_off  = lm_logits  # [B, S, VocabSize]
+
+        # Compute log‐softmax across the vocabulary at each position
+        # For a causal LM, logits_off[b, t, :] is the distribution for token at position t,
+        # given everything up to t−1. But to get "log-prob of token at t", we look back one step.
+        logprob_full = F.log_softmax(logits_off, dim=-1)          # [B, S, V]
+        logprob_next = logprob_full[:, :-1, :]                    # [B, S-1, V]
+
+    for b in range(B):
+        prompt = prompt_texts[b]
+        answer = answer_values[b]
+
+        # Identify CoT/EOS token positions (labels_tensor[b, t] != -100)
+        gold_positions = (labels_tensor[b] != -100).nonzero(as_tuple=True)[0]
+
+        total_logprob = 0.0
+        # Sum log‐probabilities of every CoT token (skip any pos == 0)
+        for pos in gold_positions:
+            t = pos.item()
+            if t == 0:
+                # t=0 would be first token of input; typically part of prompt, so skip
+                continue
+            token_id = labels_tensor[b, t].item()
+            logp     = logprob_next[b, t - 1, token_id].item()
+            total_logprob += logp
+           
+            #Print the decoded token
+            decoded_token = tokenizer.decode(token_id, skip_special_tokens=True)
+            print(f"Decoded token: \"{decoded_token}\", log‐prob: {logp:.4f}, position: {t}")
+
+        print(f"Example {b}:")
+        print(f"  Prompt: \"{prompt}\"")
+        print(f"  Answer: \"{answer}\"")
+        print(f"  Total log‐prob of gold CoT tokens: {total_logprob:.4f}")
+        print("-" * 50)
+
 
 def rollout(args, model, ref_model, tokenizer, query_tensors, query_tensors_attention_mask, answer_values, src_name):
     model.eval()
@@ -414,6 +828,22 @@ def train_one_epoch(args, model, ref_model, train_dataset, train_dataloader, opt
                 answer_values=batch['ppo_forward_kwargs']['answer_values'],
                 src_name=train_dataset[0]['item_id'].split('_')[0],
             )
+            # Offline rollout
+            offline_results = offline_rollout(
+                args,
+                model,
+                ref_model,
+                tokenizer,
+                offline_kwargs=batch['ppo_offline_forward_kwargs'],
+                answer_values=batch['ppo_forward_kwargs']['answer_values'],
+                src_name=train_dataset[0]['item_id'].split('_')[0],
+            )
+            
+            # Unpack offline rollout results
+            (model_input_ids_off, model_attention_mask_off, mask_off, rew_off, score_rew_off, 
+             ret_off, correctness_off, val_off, old_logprob_off, ref_logprob_off, adv_off) = offline_results
+           
+           
             model.train()
             # preprocess
             raw_adv = adv
@@ -421,6 +851,13 @@ def train_one_epoch(args, model, ref_model, train_dataset, train_dataloader, opt
                 adv = allgather_masked_whiten(adv, mask) # (mini_bs, seqlen)
             elif args['adv_whitening'] == 'local':
                 adv = masked_whiten(adv, mask)
+
+
+            raw_adv_off = adv_off
+            if args['adv_whitening'] == 'global':
+                adv_off = allgather_masked_whiten(adv_off, mask_off) # (mini_bs, seqlen)
+            elif args['adv_whitening'] == 'local':
+                adv_off = masked_whiten(adv_off, mask_off)
 
             batch_size_per_gpu = len(batch['ppo_forward_kwargs']['query'])
             mini_batch_size_per_gpu = args["mini_batch_size"]
@@ -474,21 +911,51 @@ def train_one_epoch(args, model, ref_model, train_dataset, train_dataloader, opt
                     vf_loss = 0.5 * ((torch.max(vf_losses1, vf_losses2) * cur_mask).sum(dim=-1) / resp_len_per_sample).mean()
                     # vf_loss = 0.5 * ((torch.max(vf_losses1, vf_losses2) * cur_mask).sum() / cur_mask.sum())
 
-                    # total loss
+                    # total online loss
                     loss += pg_loss + vf_coef * vf_loss
+        # OFFLINE DATA PROCESSING
+                    # Extract offline data for current mini-batch (use whitened advantages)
+                    cur_model_input_ids_off = model_input_ids_off[b_inds].contiguous()  # [mini_bs, S]
+                    cur_model_attention_mask_off = model_attention_mask_off[b_inds].contiguous()  # [mini_bs, S]
+                    cur_mask_off = mask_off[b_inds].contiguous()  # [mini_bs, S]
+                    cur_adv_off = adv_off[b_inds].contiguous()  # [mini_bs, S] - whitened
+                    cur_raw_adv_off = raw_adv_off[b_inds].contiguous()  # [mini_bs, S] - raw
+                    cur_ret_off = ret_off[b_inds].contiguous()  # [mini_bs, S]
+                    cur_val_off = val_off[b_inds].contiguous()  # [mini_bs, S]
+                    cur_score_rew_off = score_rew_off[b_inds].contiguous()  # [mini_bs, S]
+                    cur_old_logprob_off = old_logprob_off[b_inds].contiguous()  # [mini_bs, S-1]
+                    
+                    # Get reference logprob if available
+                    cur_ref_logprob_off = None
+                    if ref_logprob_off is not None:
+                        cur_ref_logprob_off = ref_logprob_off[b_inds].contiguous()  # [mini_bs, S-1]
 
-                    # model_output = model(input_ids=model_input_ids, attention_mask=model_attention_mask)
-                    # logits = model_output[0]
-                    # logprob_dist = torch.nn.functional.log_softmax(logits,dim=-1)
-                    # logprob = torch.gather(logprob_dist, 2, model_input_ids[:, 1:].unsqueeze(2)).squeeze(-1)
-                    # loss_pg = (-logprob * ret[:,:-1]).sum() / torch.maximum(torch.sum(mask[:,:-1]), torch.tensor(1.0))
-                    # loss += loss_pg
+                    # Forward pass on offline data
+                    lm_logits_off, _, vpreds_off = model(input_ids=cur_model_input_ids_off, attention_mask=cur_model_attention_mask_off)
+                    new_logprob_off = logprobs_from_logits(lm_logits_off[:, :-1, :], cur_model_input_ids_off[:, 1:])  # [mini_bs, S-1]
 
-                    # sft_model_input_ids = batch['ppo_forward_kwargs']['sft_model_input_ids']
-                    # sft_model_attention_mask = batch['ppo_forward_kwargs']['sft_model_attention_mask']
-                    # sft_model_labels = batch['ppo_forward_kwargs']['sft_model_labels']
-                    # loss_sft = model(input_ids=sft_model_input_ids, attention_mask=sft_model_attention_mask, labels=sft_model_labels)[0]
-                    # loss += loss_sft
+                    # Use reference model logprob as "expert" if available, otherwise use old logprob
+                    # expert_logprob = cur_ref_logprob_off if cur_ref_logprob_off is not None else cur_old_logprob_off
+
+
+                    # Importance ratio: π_new / π_expert at each token
+                    ratio_off = torch.exp(new_logprob_off - old_logprob_off[b_inds])  # [mini_bs, S-1]
+                    
+                    # PPO surrogate terms for offline data
+                    # Note: advantages are [mini_bs, S], but logprobs are [mini_bs, S-1]
+                    adv_off_trunc = cur_adv_off[:, :-1]  # [mini_bs, S-1]
+                    mask_off_trunc = cur_mask_off[:, :-1]  # [mini_bs, S-1]
+                    
+                    surr1_off = ratio_off * adv_off_trunc
+                    surr2_off = torch.clamp(ratio_off, 1 - args.get('clip_range', 0.2), 1 + args.get('clip_range', 0.2)) * adv_off_trunc
+
+                    # Policy loss for offline data (only at valid positions)
+                    policy_loss_off = -((torch.min(surr1_off, surr2_off) * mask_off_trunc).sum(dim=-1) / 
+                                       torch.clamp(mask_off_trunc.sum(dim=-1), min=1.0)).mean()
+                    
+                    loss += policy_loss_off
+
+                  
 
                     # token related metrics
                     mean_query_len = torch.mean(allgather(torch.mean(query_len_per_sample)))
@@ -564,6 +1031,11 @@ def train_one_epoch(args, model, ref_model, train_dataset, train_dataloader, opt
                     train_stats['vf_loss'] = vf_loss.item()
                     train_stats['vf_expl_var'] = vf_expl_var
 
+                    #Offline data stats
+                    train_stats['pg_loss_off'] = policy_loss_off.item()
+                    train_stats['adv_off_mean'] = masked_mean(cur_adv_off, cur_mask_off).item()
+                    train_stats['adv_off_var'] = masked_var(cur_adv_off, cur_mask_off).item()
+
                     for k, v in train_stats.items():
                         result_dict[k].append(v)
 
@@ -616,6 +1088,16 @@ def train_one_epoch(args, model, ref_model, train_dataset, train_dataloader, opt
                             "value/mean_score_reward": mean_score_reward,
                             "value/mean_kl_reward": mean_kl_reward,
                             "value/mean_kcxkl_reward": mean_kcxkl_reward,
+                        }, step=global_iter_num)
+                        wandb.log({
+                            "offline/adv_off_mean": masked_mean(cur_adv_off, cur_mask_off),
+                            "offline/adv_off_var": masked_var(cur_adv_off, cur_mask_off),
+                            "offline/mean_raw_adv_off": masked_mean(cur_raw_adv_off, cur_mask_off),
+                            "offline/mean_ret_off": masked_mean(cur_ret_off, cur_mask_off),
+                            "offline/mean_val_off": masked_mean(cur_val_off, cur_mask_off),
+                            "offline/mean_score_rew_off": masked_mean(cur_score_rew_off, cur_mask_off),
+                            "offline/mean_old_logprob_off": masked_mean(cur_old_logprob_off, cur_mask_off[:, :-1]),
+                            "offline/mean_ref_logprob_off": masked_mean(cur_ref_logprob_off, cur_mask_off[:, :-1]) if cur_ref_logprob_off is not None else 0.0,     
                         }, step=global_iter_num)
                     # Update iter num
                     # torch.distributed.barrier()
@@ -848,6 +1330,7 @@ def main(args):
             eval_log_dict = {}
             is_best = False
             if evaluating_epoch_freq is not None and epoch % evaluating_epoch_freq == 0:
+                print(f"[Epoch={epoch}/{n_epochs}] Evaluating generation...")
                 evaluate_result_dict = {f'Eval.Gen.{k}': v for k, v in
                                         evaluate_generation(args, model, test_dataset, test_dataloader, tokenizer).items()}
                 eval_log_dict.update(evaluate_result_dict)
