@@ -1,6 +1,6 @@
 checkpoints/
 wandb/
-
+ppo*/
 src/__pycache__/
 
 .idea
