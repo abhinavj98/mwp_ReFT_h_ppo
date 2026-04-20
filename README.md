@@ -1,4 +1,5 @@
-# ReFT: Reasoning with REinforced Fine-Tuning
+# ReFT: Reasoning with REinforced Fine-Tuning. Modified for NLP with deep learning class project to support custom Hybrid-PPO algorithm
+Final report can be found [here](Final_Paper.pdf)
 This repo contains source code and data to reproduce the results in the research paper [ReFT: Reasoning with REinforced Fine-Tuning](https://arxiv.org/abs/2401.08967)
 
 ## Instruction
